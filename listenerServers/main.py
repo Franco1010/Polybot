@@ -17,7 +17,7 @@ client = discord.Client(intents=intents)
 async def send_message(message):
     query_params = {'command': message.content}
     query_string = urllib.parse.urlencode(query_params)
-    url = POLYBOT_ENDPOINT + query_string
+    url = POLYBOT_ENDPOINT + '?' + query_string
     print(url)
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
