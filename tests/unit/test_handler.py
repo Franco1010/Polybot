@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from discordBot import app
+from polybotCommand import app
 
 
 @pytest.fixture()
