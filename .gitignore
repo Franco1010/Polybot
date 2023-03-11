@@ -1,6 +1,8 @@
 # Created by https://www.toptal.com/developers/gitignore/api/osx,linux,python,windows,pycharm,visualstudiocode,sam,sam+config
 # Edit at https://www.toptal.com/developers/gitignore?templates=osx,linux,python,windows,pycharm,visualstudiocode,sam,sam+config
 
+*.zip
+
 ### Linux ###
 *~
 

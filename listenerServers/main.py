@@ -23,7 +23,7 @@ async def send_message(message):
         async with session.get(url) as response:
             response_json = await response.json()
             channel = message.channel
-            await channel.send(response_json['response'])
+            await channel.send(response_json)
 
 @client.event
 async def on_message(message):
