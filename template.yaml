@@ -38,7 +38,7 @@ Resources:
     Properties:
       CodeUri: polybotCommand/
       Handler: app.lambda_handler
-      Runtime: python3.9
+      Runtime: python3.7
       Architectures:
       - x86_64
       Timeout: 60
@@ -48,7 +48,7 @@ Resources:
       Environment:
         Variables:
           PYTHONPATH: "/var/task/src:/opt/python"
-          PATH: "/opt/bin:/opt/bin/lib"
+          PATH: "/opt/bin/chrome-linux:/opt/bin:/opt/bin/lib"
           BUCKET: !Ref Bucket
           URL: https://polygon.codeforces.com/
           DESTPATH: screenshots
@@ -70,16 +70,16 @@ Resources:
 
   # --------------------- LAYERS ---------------------
   ChromiumLayer:
-    Type: AWS::Lambda::LayerVersion
+    Type: AWS::Serverless::LayerVersion
     Properties:
         CompatibleRuntimes:
             - python3.9
-        Content:
-            S3Bucket: 
-                Ref: ConfBucket
-            S3Key: 
-                Fn::Sub: 'src/ChromiumLayer.zip'
-        Description: Chromium Layer for Python3.9
+            - python3.7
+            - python3.8
+        ContentUri: chromium_layer
+    Metadata:
+      BuildMethod: makefile              # Required to have AWS SAM build this layer
+
 
   # --------------------- RESOURCE GROUP ---------------------
   ApplicationResourceGroup:
