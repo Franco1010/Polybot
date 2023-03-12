@@ -82,7 +82,7 @@ class WebDriverScreenshot:
     def __get_correct_height(self, url, width=1280):
         chrome_options=self.__get_default_chrome_options()
         chrome_options.add_argument('--window-size={}x{}'.format(width, 1024))
-        driver = webdriver.Chrome(chrome_options=chrome_options)
+        driver = webdriver.Chrome(executable_path='/opt/bin/chromedriver', chrome_options=chrome_options)
         driver.get(url)
         height = driver.execute_script("return Math.max( document.body.scrollHeight, document.body.offsetHeight, document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight )")
         driver.quit()
@@ -96,7 +96,7 @@ class WebDriverScreenshot:
         chrome_options.add_argument('--window-size={}x{}'.format(width, height))
         chrome_options.add_argument('--hide-scrollbars')
 
-        driver = webdriver.Chrome(chrome_options=chrome_options)
+        driver = webdriver.Chrome(executable_path='/opt/bin/chromedriver', chrome_options=chrome_options)
         logger.info('Using Chromium version: {}'.format(driver.capabilities['browserVersion']))
         driver.get(url)
         driver.save_screenshot(filename)
