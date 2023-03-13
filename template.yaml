@@ -2,31 +2,86 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
   Polybot
+  SAM Template for Polybot  
 
-  Sample SAM Template for Polybot
-
-# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
-Globals:
-  Function:
-    Timeout: 3
-    MemorySize: 128
+Parameters:
+  ConfBucket:
+    Description: s3 bucket
+    Type: String
 
 Resources:
+  # --------------------- STORAGE ---------------------
+  Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: Private
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteOutputFiles
+            Prefix: output/
+            Status: Enabled
+            ExpirationInDays: 1
+      CorsConfiguration:
+        CorsRules:
+          - AllowedMethods:
+              - GET
+              - POST
+              - PUT
+            AllowedOrigins:
+              - '*'
+            AllowedHeaders:
+              - '*'
+
+  # --------------------- LAMBDAS ---------------------
   PolybotCommand:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Type: AWS::Serverless::Function
     Properties:
       CodeUri: polybotCommand/
       Handler: app.lambda_handler
-      Runtime: python3.9
+      Runtime: python3.7
       Architectures:
       - x86_64
+      Timeout: 60
+      MemorySize: 2048
+      Layers:
+        - Ref: ChromiumLayer
+      Environment:
+        Variables:
+          PYTHONPATH: "/var/task/src:/opt/python"
+          PATH: "/opt/bin/chrome-linux:/opt/bin:/opt/bin/lib"
+          BUCKET: !Ref Bucket
+          URL: https://polygon.codeforces.com/
+          DESTPATH: screenshots
       Events:
         Api:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Type: Api
           Properties:
             Path: /polybotCommand
-            Method: get
+            Method: GET
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - s3:*
+              Resource: 
+                - !Sub 'arn:aws:s3:::${Bucket}'
+                - !Sub 'arn:aws:s3:::${Bucket}/*'
 
+  # --------------------- LAYERS ---------------------
+  ChromiumLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+        CompatibleRuntimes:
+            - python3.9
+            - python3.7
+            - python3.8
+        ContentUri: chromium_layer
+    Metadata:
+      BuildMethod: makefile              # Required to have AWS SAM build this layer
+
+
+  # --------------------- RESOURCE GROUP ---------------------
   ApplicationResourceGroup:
     Type: AWS::ResourceGroups::Group
     Properties:
@@ -47,6 +102,7 @@ Resources:
           - Ref: AWS::StackName
       AutoConfigurationEnabled: 'true'
     DependsOn: ApplicationResourceGroup
+    
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
   # Find out more about other implicit resources you can reference within SAM
