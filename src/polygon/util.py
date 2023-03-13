@@ -1,16 +1,20 @@
 from collections import namedtuple
 
-Problem = (namedtuple('Problem', ['Id', 'Owner', 'Name', 'Deleted', 'Favourite',
-    'AccessType', 'Revision', 'LatestPackage', 'Modified']))
+Problem = (namedtuple('Problem', ['id', 'owner', 'name', 'deleted', 'favourite','accessType', 'revision', 'latestPackage', 'modified']))
 
-ProblemInfo = namedtuple('ProblemInfo', ['InputFile', 'OutputFile', 'Interactive', 'TimeLimit', 'MemoryLimit'])
+ProblemInfo = (namedtuple('ProblemInfo', ['timeLimit','inputFile', 'outputFile', 'interactive', 'memoryLimit']))
 
-Statement = namedtuple('Statement', ['Encoding', 'Name', 'Legend', 'Input', 'Output', 'Scoring', 'Notes', 'Tutorial'])
+Statement = namedtuple('Statement', ['encoding', 'name', 'legend', 'input', 'output', 'scoring', 'notes', 'tutorial'])
 
-ResourceAdvancedProperties = namedtuple('ResourceAdvancedProperties', ['ForTypes', 'Main', 'Stages', 'Assets'])
+ResourceAdvancedProperties = namedtuple('ResourceAdvancedProperties', ['forTypes', 'main', 'stages', 'assets'])
 
-File = namedtuple('File', ['Name', 'ModificationTimeSeconds', 'Length', 'SourceType', 'ResourceAdvancedProperties'])
+File = namedtuple('File', ['name', 'modificationTimeSeconds', 'length', 'sourceType', 'resourceAdvancedProperties'])
 
-Solution = namedtuple('Solution', ['name', 'modification_time_seconds', 'length', 'source_type', 'tag'])
+Solution = namedtuple('Solution', ['name', 'modificationTimeSeconds', 'length', 'source_type', 'tag'])
 
-Test = namedtuple('Test', ['index manual input description use_in_statements script_line groups points input_for_statement output_for_statement verify_input_output_for_statements'])
+Test = namedtuple('Test', ['index', 'useInStatements', 'manual', 'scriptLine', 'groups', 'points','inputForStatement', 'outputForStatement', 'verifyInputOutputForStatements'])
+
+Package = namedtuple('Package', ['id', 'revision', 'creationTimeSeconds', 'state', 'comment', 'type'])
+
+TestGroup = namedtuple('TestGroupObject', ['name', 'pointsPolicy', 'feedbackPolicy', 'dependencies'])
+
