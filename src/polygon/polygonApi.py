@@ -1,7 +1,6 @@
 import logging
 import aiohttp
 import endpoints as URL
-import polygonApiError as Error
 from util import *
 import asyncio
 import time
