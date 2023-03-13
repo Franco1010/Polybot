@@ -9,11 +9,14 @@ import hashlib
 import random
 import string
 from urllib.parse import urlencode, quote
+from dotenv import load_dotenv
+import os
 
-API_KEY = 'c579b44bcb821fab0ef1ac4e2097ee9a5e2494dc'
-SECRET = '35f9af93186937d11276f40f75a6fbb623a5e174'
-PROBLEM_ID = '100'
+load_dotenv()
 logger = logging.getLogger(__name__)
+
+POLYGON_API_KEY = os.getenv('POLYGON_API_KEY')
+POLYGON_SECRET = os.getenv('POLYGON_SECRET')
 
 def make_from_dict(namedtuple_cls, dict_):
     field_vals = [dict_.get(field) for field in namedtuple_cls._fields]
@@ -24,7 +27,7 @@ def prepare_url(parameters_original, method_name):
     parameters = parameters_original.copy()
     # Add "time" and "apiKey" parameter
     parameters["time"] = sec
-    parameters["apiKey"] = API_KEY
+    parameters["apiKey"] = POLYGON_API_KEY
     # Add "problemproblemId" parameter only if it is a prob
     # if not (method_name == "problems.list" or method_name == "contest.problems"):
     #     parameters["problemId"] = PROBLEM_ID
@@ -57,7 +60,7 @@ def prepare_url(parameters_original, method_name):
         first = False
 
     rand_prefix = generate_random_prefix(6)
-    to_hash = rand_prefix + "/" + common_part + "#" + SECRET
+    to_hash = rand_prefix + "/" + common_part + "#" + POLYGON_SECRET
     hashed_string = create_sha512_hash(to_hash)
     request_url = URL.BASE_URL + common_part_escaped + "&apiSig=" + rand_prefix + hashed_string
     return request_url
@@ -106,7 +109,7 @@ class Polygon:
         return [[language, make_from_dict(Statement, statement)] for language,statement in resp]
     async def save_statement():
         params = {}
-        resp = await _query_api(URL.PROBLEM_SAVE_STATEMENT_EP,params)
+
     async def statement_resources(problemId):
         params = {'problemId':problemId}
         url = prepare_url(params,URL.PROBLEM_STATEMENT_RESOURCES_EP)
@@ -118,7 +121,7 @@ class Polygon:
     async def save_statement_resources():
         params = {}
         url = prepare_url(params, URL.PROBLEM_SAVE_STATEMENT_RESOURCE_EP)
-        resp = await _query_api(URL.PROBLEM_SAVE_STATEMENT_RESOURCE_EP,params)
+
     async def problem_checker(problemId):
         params = {'problemId':problemId}
         url = prepare_url(params,URL.PROBLEM_CHECKER_EP)

@@ -7,9 +7,13 @@ import time
 import hashlib
 from urllib.parse import urlencode, quote
 from util import *
-API_KEY = 'c579b44bcb821fab0ef1ac4e2097ee9a5e2494dc'
-SECRET = '35f9af93186937d11276f40f75a6fbb623a5e174'
-PROBLEM_ID = '100'
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+API_KEY = os.getenv('POLYGON_API_KEY')
+SECRET = os.getenv('POLYGON_SECRET')
+
 
 def make_from_dict(namedtuple_cls, dict_):
     field_vals = [dict_.get(field) for field in namedtuple_cls._fields]
