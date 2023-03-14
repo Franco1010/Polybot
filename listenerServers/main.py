@@ -9,7 +9,7 @@ load_dotenv()
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 POLYBOT_ENDPOINT = os.getenv('POLYBOT_ENDPOINT')
 intents = discord.Intents.default()
-intents.message_content = True
+intents.messages = True
 
 
 client = discord.Client(intents=intents)
