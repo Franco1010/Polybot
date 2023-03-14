@@ -4,11 +4,6 @@ Description: >
   Polybot
   SAM Template for Polybot  
 
-Parameters:
-  ConfBucket:
-    Description: s3 bucket
-    Type: String
-
 Resources:
   # --------------------- STORAGE ---------------------
   Bucket:
@@ -21,6 +16,8 @@ Resources:
             Prefix: output/
             Status: Enabled
             ExpirationInDays: 1
+      WebsiteConfiguration:
+        IndexDocument: 'index.html'
       CorsConfiguration:
         CorsRules:
           - AllowedMethods:
@@ -31,6 +28,22 @@ Resources:
               - '*'
             AllowedHeaders:
               - '*'
+  PublicBucketFolder:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref Bucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Action:
+            - 's3:GetObject'
+            Effect: Allow
+            Resource: !Join
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref Bucket
+                - /public/*
+            Principal: '*'
 
   # --------------------- LAMBDAS ---------------------
   PolybotCommand:
@@ -50,8 +63,8 @@ Resources:
           PYTHONPATH: "/var/task/src:/opt/python"
           PATH: "/opt/bin/chrome-linux:/opt/bin:/opt/bin/lib"
           BUCKET: !Ref Bucket
-          URL: https://polygon.codeforces.com/
-          DESTPATH: screenshots
+          SCREENSHOT_PATH: screenshots
+          S3WEB: !Sub "http://${Bucket}.s3-website.${AWS::Region}.amazonaws.com"
       Events:
         Api:
           Type: Api
@@ -79,7 +92,6 @@ Resources:
         ContentUri: chromium_layer
     Metadata:
       BuildMethod: makefile              # Required to have AWS SAM build this layer
-
 
   # --------------------- RESOURCE GROUP ---------------------
   ApplicationResourceGroup:
