@@ -1,20 +1,70 @@
 from collections import namedtuple
 
-Problem = (namedtuple('Problem', ['id', 'owner', 'name', 'deleted', 'favourite','accessType', 'revision', 'latestPackage', 'modified']))
 
-ProblemInfo = (namedtuple('ProblemInfo', ['timeLimit','inputFile', 'outputFile', 'interactive', 'memoryLimit']))
+Problem = namedtuple(
+    "Problem",
+    [
+        "id",
+        "owner",
+        "name",
+        "deleted",
+        "favourite",
+        "accessType",
+        "revision",
+        "latestPackage",
+        "modified",
+    ],
+)
 
-Statement = namedtuple('Statement', ['encoding', 'name', 'legend', 'input', 'output', 'scoring', 'notes', 'tutorial'])
 
-ResourceAdvancedProperties = namedtuple('ResourceAdvancedProperties', ['forTypes', 'main', 'stages', 'assets'])
+ProblemInfo = namedtuple(
+    "ProblemInfo",
+    ["timeLimit", "inputFile", "outputFile", "interactive", "memoryLimit"],
+)
 
-File = namedtuple('File', ['name', 'modificationTimeSeconds', 'length', 'sourceType', 'resourceAdvancedProperties'])
+Statement = namedtuple(
+    "Statement",
+    ["encoding", "name", "legend", "input", "output", "scoring", "notes", "tutorial"],
+)
 
-Solution = namedtuple('Solution', ['name', 'modificationTimeSeconds', 'length', 'source_type', 'tag'])
+ResourceAdvancedProperties = namedtuple(
+    "ResourceAdvancedProperties", ["forTypes", "main", "stages", "assets"]
+)
 
-Test = namedtuple('Test', ['index', 'useInStatements', 'manual', 'scriptLine', 'groups', 'points','inputForStatement', 'outputForStatement', 'verifyInputOutputForStatements'])
+File = namedtuple(
+    "File",
+    [
+        "name",
+        "modificationTimeSeconds",
+        "length",
+        "sourceType",
+        "resourceAdvancedProperties",
+    ],
+)
 
-Package = namedtuple('Package', ['id', 'revision', 'creationTimeSeconds', 'state', 'comment', 'type'])
+Solution = namedtuple(
+    "Solution", ["name", "modificationTimeSeconds", "length", "source_type", "tag"]
+)
 
-TestGroup = namedtuple('TestGroupObject', ['name', 'pointsPolicy', 'feedbackPolicy', 'dependencies'])
+Test = namedtuple(
+    "Test",
+    [
+        "index",
+        "useInStatements",
+        "manual",
+        "scriptLine",
+        "groups",
+        "points",
+        "inputForStatement",
+        "outputForStatement",
+        "verifyInputOutputForStatements",
+    ],
+)
 
+Package = namedtuple(
+    "Package", ["id", "revision", "creationTimeSeconds", "state", "comment", "type"]
+)
+
+TestGroup = namedtuple(
+    "TestGroupObject", ["name", "pointsPolicy", "feedbackPolicy", "dependencies"]
+)

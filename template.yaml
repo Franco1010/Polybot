@@ -141,7 +141,7 @@ Resources:
         - python3.7
       ContentUri: src_layer
     Metadata:
-      BuildMethod: python3.7
+      BuildMethod: python3.7              # Required to have AWS SAM build this layer
 
   ChromiumLayer:
     Type: AWS::Serverless::LayerVersion
