@@ -44,6 +44,57 @@ Resources:
                 - !Ref Bucket
                 - /public/*
             Principal: '*'
+  ContestsDB: 
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      AttributeDefinitions: 
+        - AttributeName: "id"
+          AttributeType: "S"
+        - AttributeName: "source"
+          AttributeType: "S"
+        - AttributeName: "group_id"
+          AttributeType: "S"      
+      KeySchema: 
+        - AttributeName: "id"
+          KeyType: "HASH"
+        - AttributeName: "source"
+          KeyType: "RANGE"
+      GlobalSecondaryIndexes:
+        - IndexName: "group_contests"
+          KeySchema:
+            - AttributeName: "group_id"
+              KeyType: "HASH"
+            - AttributeName: 'id'
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: "ALL"
+      BillingMode: "PAY_PER_REQUEST"
+
+  SpacesDB: 
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      AttributeDefinitions: 
+        - AttributeName: "id"
+          AttributeType: "S"
+        - AttributeName: "app"
+          AttributeType: "S"
+        - AttributeName: "group_id"
+          AttributeType: "S"  
+      KeySchema: 
+        - AttributeName: "id"
+          KeyType: "HASH"
+        - AttributeName: "app"
+          KeyType: "RANGE"
+      GlobalSecondaryIndexes:
+        - IndexName: "group_spaces"
+          KeySchema:
+            - AttributeName: 'group_id'
+              KeyType: 'HASH'
+            - AttributeName: 'id'
+              KeyType: 'RANGE'
+          Projection:
+            ProjectionType: 'ALL'
+      BillingMode: 'PAY_PER_REQUEST'
 
   # --------------------- LAMBDAS ---------------------
   PolybotCommand:
