@@ -44,7 +44,7 @@ Resources:
                 - !Ref Bucket
                 - /public/*
             Principal: '*'
-ContestsDB: 
+  ContestsDB: 
     Type: AWS::DynamoDB::Table
     Properties: 
       AttributeDefinitions: 
