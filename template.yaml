@@ -57,6 +57,7 @@ Resources:
       Timeout: 60
       MemorySize: 2048
       Layers:
+        - Ref: SrcLayer
         - Ref: ChromiumLayer
       Environment:
         Variables:
@@ -82,14 +83,21 @@ Resources:
                 - !Sub 'arn:aws:s3:::${Bucket}/*'
 
   # --------------------- LAYERS ---------------------
+  SrcLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      CompatibleRuntimes:
+        - python3.7
+      ContentUri: src_layer
+    Metadata:
+      BuildMethod: python3.7
+
   ChromiumLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
-        CompatibleRuntimes:
-            - python3.9
-            - python3.7
-            - python3.8
-        ContentUri: chromium_layer
+      CompatibleRuntimes:
+        - python3.7
+      ContentUri: chromium_layer
     Metadata:
       BuildMethod: makefile              # Required to have AWS SAM build this layer
 
