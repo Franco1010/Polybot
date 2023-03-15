@@ -14,12 +14,15 @@ import os
 load_dotenv()
 logger = logging.getLogger(__name__)
 
-POLYGON_API_KEY = os.getenv('POLYGON_API_KEY')
-POLYGON_SECRET = os.getenv('POLYGON_SECRET')
+POLYGON_API_KEY = os.getenv("POLYGON_API_KEY")
+POLYGON_SECRET = os.getenv("POLYGON_SECRET")
+
 
 def make_from_dict(namedtuple_cls, dict_):
     field_vals = [dict_.get(field) for field in namedtuple_cls._fields]
     return namedtuple_cls._make(field_vals)
+
+
 def prepare_url(parameters_original, method_name):
     sec = str(int(time.time()))
     # First, copy the dictionary, so that you do not modify user's dictionary
@@ -61,114 +64,138 @@ def prepare_url(parameters_original, method_name):
     rand_prefix = generate_random_prefix(6)
     to_hash = rand_prefix + "/" + common_part + "#" + POLYGON_SECRET
     hashed_string = create_sha512_hash(to_hash)
-    request_url = URL.BASE_URL + common_part_escaped + "&apiSig=" + rand_prefix + hashed_string
+    request_url = (
+        URL.BASE_URL + common_part_escaped + "&apiSig=" + rand_prefix + hashed_string
+    )
     return request_url
+
 
 def generate_random_prefix(string_length):
     letters = string.ascii_lowercase + string.ascii_uppercase
-    return ''.join(random.choice(letters) for i in range(string_length))
+    return "".join(random.choice(letters) for i in range(string_length))
 
 
 def create_sha512_hash(s):
     return hashlib.sha512(s.encode("utf-8")).hexdigest()
+
 
 async def make_api_call(url):
     print(url)
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             if response.status == 200:
-                data = await response.json(content_type='text/html')
+                data = await response.json(content_type="text/html")
                 print(data)
-                if 'result' in data:
-                    return data['result']
+                if "result" in data:
+                    return data["result"]
                 return "ok"
             else:
                 return None
+
 
 class Polygon:
     @staticmethod
     async def list():
         params = {}
-        url = prepare_url(params,URL.PROBLEMS_LIST_EP)
+        url = prepare_url(params, URL.PROBLEMS_LIST_EP)
         resp = await make_api_call(url)
         return [make_from_dict(Problem, problems_dict) for problems_dict in resp]
+
     async def info(problemId):
-        params = {'problemId':problemId}
-        url = prepare_url(params,URL.PROBLEM_INFO_EP)
+        params = {"problemId": problemId}
+        url = prepare_url(params, URL.PROBLEM_INFO_EP)
         resp = await make_api_call(url)
-        return make_from_dict(ProblemInfo,resp)
+        return make_from_dict(ProblemInfo, resp)
+
     async def update_info(problemId):
-        params = {'problemId':problemId}
-        url = prepare_url(params,URL.PROBLEM_UPDATE_INFO_EP)
+        params = {"problemId": problemId}
+        url = prepare_url(params, URL.PROBLEM_UPDATE_INFO_EP)
         resp = await make_api_call(url)
+
     async def statements(problemId):
-        params = {'problemId':problemId}
-        url = prepare_url(params,URL.PROBLEM_STATEMENTS_EP)
+        params = {"problemId": problemId}
+        url = prepare_url(params, URL.PROBLEM_STATEMENTS_EP)
         resp = await make_api_call(url)
-        return [[language, make_from_dict(Statement, statement)] for language,statement in resp]
+        return [
+            [language, make_from_dict(Statement, statement)]
+            for language, statement in resp
+        ]
+
     async def save_statement():
         params = {}
 
     async def statement_resources(problemId):
-        params = {'problemId':problemId}
-        url = prepare_url(params,URL.PROBLEM_STATEMENT_RESOURCES_EP)
+        params = {"problemId": problemId}
+        url = prepare_url(params, URL.PROBLEM_STATEMENT_RESOURCES_EP)
         resp = await make_api_call(url)
         files = [make_from_dict(File, file) for file in resp]
         for file in files:
-            file['ResourceAdvancedProperties']=make_from_dict(ResourceAdvancedProperties, file['ResourceAdvancedProperties'])
+            file["ResourceAdvancedProperties"] = make_from_dict(
+                ResourceAdvancedProperties, file["ResourceAdvancedProperties"]
+            )
         return files
+
     async def save_statement_resources():
         params = {}
         url = prepare_url(params, URL.PROBLEM_SAVE_STATEMENT_RESOURCE_EP)
 
     async def problem_checker(problemId):
-        params = {'problemId':problemId}
-        url = prepare_url(params,URL.PROBLEM_CHECKER_EP)
+        params = {"problemId": problemId}
+        url = prepare_url(params, URL.PROBLEM_CHECKER_EP)
         resp = await make_api_call(url)
         return resp
+
     async def problem_validator(problemId):
-        params = {'problemId':problemId}
-        url = prepare_url(params,URL.PROBLEM_VALIDATOR_EP)
+        params = {"problemId": problemId}
+        url = prepare_url(params, URL.PROBLEM_VALIDATOR_EP)
         resp = await make_api_call(url)
         return resp
+
     async def problem_interactor(problemId):
-        params = {'problemId':problemId}
-        url = prepare_url(params,URL.PROBLEM_INTERACTOR_EP)
+        params = {"problemId": problemId}
+        url = prepare_url(params, URL.PROBLEM_INTERACTOR_EP)
         resp = await make_api_call(url)
+
     async def files(problemId):
-        params = {'problemId':problemId}
-        url = prepare_url(params,URL.PROBLEM_FILES_EP)
+        params = {"problemId": problemId}
+        url = prepare_url(params, URL.PROBLEM_FILES_EP)
         resp = await make_api_call(url)
-        files=[]
-        files.append([make_from_dict(File, file) for file in resp['resourceFile']])
-        files.append([make_from_dict(File, file) for file in resp['sourceFiles']])
-        files.append([make_from_dict(File, file) for file in resp['auxFiles']])
+        files = []
+        files.append([make_from_dict(File, file) for file in resp["resourceFile"]])
+        files.append([make_from_dict(File, file) for file in resp["sourceFiles"]])
+        files.append([make_from_dict(File, file) for file in resp["auxFiles"]])
         for file in files:
-            file['ResourceAdvancedProperties']=make_from_dict(ResourceAdvancedProperties, file['ResourceAdvancedProperties'])
+            file["ResourceAdvancedProperties"] = make_from_dict(
+                ResourceAdvancedProperties, file["ResourceAdvancedProperties"]
+            )
         return files
+
     async def solutions(problemId):
-        params = {'problemId':problemId}
-        url = prepare_url(params,URL.PROBLEM_SOLUTIONS_EP)
+        params = {"problemId": problemId}
+        url = prepare_url(params, URL.PROBLEM_SOLUTIONS_EP)
         resp = await make_api_call(url)
         return [make_from_dict(Solution, solutions_dict) for solutions_dict in resp]
+
     async def tests(problemId):
-        params = {'problemId':problemId}
-        url = prepare_url(params,URL.PROBLEM_TESTS_EP)
+        params = {"problemId": problemId}
+        url = prepare_url(params, URL.PROBLEM_TESTS_EP)
         resp = await make_api_call(url)
         return [make_from_dict(Test, test_dict) for test_dict in resp]
+
     async def problem_set_checker(problemId, checker):
-        params = {'problemId': problemId, 'checker':checker}
-        url = prepare_url(params,URL.PROBLEM_SET_CHECKER_EP)
+        params = {"problemId": problemId, "checker": checker}
+        url = prepare_url(params, URL.PROBLEM_SET_CHECKER_EP)
         resp = await make_api_call(url)
         return resp
+
     async def problem_set_validator(problemId, validator):
-        params = {'problemId': problemId, 'validator':validator}
-        url = prepare_url(params,URL.PROBLEM_SET_VALIDATOR_EP)
+        params = {"problemId": problemId, "validator": validator}
+        url = prepare_url(params, URL.PROBLEM_SET_VALIDATOR_EP)
         resp = await make_api_call(url)
         return resp
+
     async def packages(problemId):
-        params = {'problemId':problemId}
-        url = prepare_url(params,URL.PROBLEM_PACKAGES_EP)
+        params = {"problemId": problemId}
+        url = prepare_url(params, URL.PROBLEM_PACKAGES_EP)
         resp = await make_api_call(url)
         return [make_from_dict(Package, pack_dict) for pack_dict in resp]
-
