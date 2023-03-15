@@ -5,6 +5,7 @@ import uuid
 from webdriver_screenshot import WebDriverScreenshot
 import click
 import utils
+from polygon import utils as polygon_utils
 
 @click.group()
 def cli():
