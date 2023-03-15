@@ -1,8 +1,7 @@
 import logging
 import aiohttp
 import endpoints as URL
-from util import *
-import asyncio
+from polygon import utils as polygon_utils
 import time
 import hashlib
 import random
@@ -97,14 +96,16 @@ async def list():
     params = {}
     url = prepare_url(params, URL.PROBLEMS_LIST_EP)
     resp = await make_api_call(url)
-    return [make_from_dict(Problem, problems_dict) for problems_dict in resp]
+    return [
+        make_from_dict(polygon_utils.Problem, problems_dict) for problems_dict in resp
+    ]
 
 
 async def info(problemId):
     params = {"problemId": problemId}
     url = prepare_url(params, URL.PROBLEM_INFO_EP)
     resp = await make_api_call(url)
-    return make_from_dict(ProblemInfo, resp)
+    return make_from_dict(polygon_utils.ProblemInfo, resp)
 
 
 async def update_info(problemId):
@@ -118,7 +119,8 @@ async def statements(problemId):
     url = prepare_url(params, URL.PROBLEM_STATEMENTS_EP)
     resp = await make_api_call(url)
     return [
-        [language, make_from_dict(Statement, statement)] for language, statement in resp
+        [language, make_from_dict(polygon_utils.Statement, statement)]
+        for language, statement in resp
     ]
 
 
@@ -133,7 +135,7 @@ async def statement_resources(problemId):
     files = [make_from_dict(File, file) for file in resp]
     for file in files:
         file["ResourceAdvancedProperties"] = make_from_dict(
-            ResourceAdvancedProperties, file["ResourceAdvancedProperties"]
+            polygon_utils.ResourceAdvancedProperties, file["ResourceAdvancedProperties"]
         )
     return files
 
@@ -143,21 +145,21 @@ async def save_statement_resources():
     url = prepare_url(params, URL.PROBLEM_SAVE_STATEMENT_RESOURCE_EP)
 
 
-async def problem_checker(problemId):
+async def checker(problemId):
     params = {"problemId": problemId}
     url = prepare_url(params, URL.PROBLEM_CHECKER_EP)
     resp = await make_api_call(url)
     return resp
 
 
-async def problem_validator(problemId):
+async def validator(problemId):
     params = {"problemId": problemId}
     url = prepare_url(params, URL.PROBLEM_VALIDATOR_EP)
     resp = await make_api_call(url)
     return resp
 
 
-async def problem_interactor(problemId):
+async def interactor(problemId):
     params = {"problemId": problemId}
     url = prepare_url(params, URL.PROBLEM_INTERACTOR_EP)
     resp = await make_api_call(url)
@@ -168,12 +170,18 @@ async def files(problemId):
     url = prepare_url(params, URL.PROBLEM_FILES_EP)
     resp = await make_api_call(url)
     files = []
-    files.append([make_from_dict(File, file) for file in resp["resourceFile"]])
-    files.append([make_from_dict(File, file) for file in resp["sourceFiles"]])
-    files.append([make_from_dict(File, file) for file in resp["auxFiles"]])
+    files.append(
+        [make_from_dict(polygon_utils.File, file) for file in resp["resourceFile"]]
+    )
+    files.append(
+        [make_from_dict(polygon_utils.File, file) for file in resp["sourceFiles"]]
+    )
+    files.append(
+        [make_from_dict(polygon_utils.File, file) for file in resp["auxFiles"]]
+    )
     for file in files:
         file["ResourceAdvancedProperties"] = make_from_dict(
-            ResourceAdvancedProperties, file["ResourceAdvancedProperties"]
+            polygon_utils.ResourceAdvancedProperties, file["ResourceAdvancedProperties"]
         )
     return files
 
@@ -182,24 +190,27 @@ async def solutions(problemId):
     params = {"problemId": problemId}
     url = prepare_url(params, URL.PROBLEM_SOLUTIONS_EP)
     resp = await make_api_call(url)
-    return [make_from_dict(Solution, solutions_dict) for solutions_dict in resp]
+    return [
+        make_from_dict(polygon_utils.Solution, solutions_dict)
+        for solutions_dict in resp
+    ]
 
 
 async def tests(problemId):
     params = {"problemId": problemId}
     url = prepare_url(params, URL.PROBLEM_TESTS_EP)
     resp = await make_api_call(url)
-    return [make_from_dict(Test, test_dict) for test_dict in resp]
+    return [make_from_dict(polygon_utils.Test, test_dict) for test_dict in resp]
 
 
-async def problem_set_checker(problemId, checker):
+async def set_checker(problemId, checker):
     params = {"problemId": problemId, "checker": checker}
     url = prepare_url(params, URL.PROBLEM_SET_CHECKER_EP)
     resp = await make_api_call(url)
     return resp
 
 
-async def problem_set_validator(problemId, validator):
+async def set_validator(problemId, validator):
     params = {"problemId": problemId, "validator": validator}
     url = prepare_url(params, URL.PROBLEM_SET_VALIDATOR_EP)
     resp = await make_api_call(url)
@@ -210,4 +221,4 @@ async def packages(problemId):
     params = {"problemId": problemId}
     url = prepare_url(params, URL.PROBLEM_PACKAGES_EP)
     resp = await make_api_call(url)
-    return [make_from_dict(Package, pack_dict) for pack_dict in resp]
+    return [make_from_dict(polygon_utils.Package, pack_dict) for pack_dict in resp]
