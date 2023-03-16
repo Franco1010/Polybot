@@ -1,23 +1,10 @@
-import os
-import shutil
-import uuid
-import logging
-import boto3
-import os
-import utils
-
 from selenium import webdriver
-
-logger = logging.getLogger()
-
-s3 = boto3.client("s3")
-
-BUCKET = os.environ["BUCKET"]
-S3WEB = os.environ["S3WEB"]
-SCREENSHOT_PATH = os.environ["SCREENSHOT_PATH"]
+import shutil
+import os
+import uuid
 
 
-class WebDriverScreenshot:
+class WebDriver:
     def __init__(self):
         self._tmp_folder = "/tmp/{}".format(uuid.uuid4())
 
@@ -120,9 +107,6 @@ class WebDriverScreenshot:
         driver = webdriver.Chrome(
             executable_path="/opt/bin/chromedriver", chrome_options=chrome_options
         )
-        logger.info(
-            "Using Chromium version: {}".format(driver.capabilities["browserVersion"])
-        )
         driver.get(url)
         driver.save_screenshot(filename)
         driver.quit()
@@ -130,26 +114,3 @@ class WebDriverScreenshot:
     def close(self):
         # Remove specific tmp dir of this "run"
         shutil.rmtree(self._tmp_folder)
-
-
-def take(url):
-    screenshot_file = "{}-{}".format(
-        "".join(filter(str.isalpha, url)), str(uuid.uuid4())
-    )
-    driver = WebDriverScreenshot()
-    driver.save_screenshot(
-        url, "/tmp/{}-fixed.png".format(screenshot_file), height=1024
-    )
-    driver.save_screenshot(url, "/tmp/{}-full.png".format(screenshot_file))
-
-    driver.close()
-
-    ## Upload generated screenshot files to S3 bucket.
-    fixedPath = "{}/{}-fixed.png".format(SCREENSHOT_PATH, screenshot_file)
-    fullPath = "{}/{}-full.png".format(SCREENSHOT_PATH, screenshot_file)
-    s3.upload_file("/tmp/{}-fixed.png".format(screenshot_file), BUCKET, fixedPath)
-    s3.upload_file("/tmp/{}-full.png".format(screenshot_file), BUCKET, fullPath)
-    return {
-        "fixed": utils.shortPublicS3Url(BUCKET, S3WEB, fixedPath),
-        "full": utils.shortPublicS3Url(BUCKET, S3WEB, fullPath),
-    }
