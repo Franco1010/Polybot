@@ -4,6 +4,17 @@ Description: >
   Polybot
   SAM Template for Polybot  
 
+Globals:
+  Function:
+    Runtime: python3.7
+    Environment:
+      Variables:
+        PYTHONPATH: "/var/task/src:/opt/python"
+        PATH: "/opt/bin/chrome-linux:/opt/bin:/opt/bin/lib"
+        BUCKET: !Ref Bucket
+        SCREENSHOT_PATH: screenshots
+        S3WEB: !Sub "http://${Bucket}.s3-website.${AWS::Region}.amazonaws.com"
+
 Resources:
   # --------------------- STORAGE ---------------------
   Bucket:
@@ -28,6 +39,7 @@ Resources:
               - '*'
             AllowedHeaders:
               - '*'
+
   PublicBucketFolder:
     Type: AWS::S3::BucketPolicy
     Properties:
@@ -44,6 +56,7 @@ Resources:
                 - !Ref Bucket
                 - /public/*
             Principal: '*'
+
   ContestsDB: 
     Type: AWS::DynamoDB::Table
     Properties: 
@@ -102,26 +115,53 @@ Resources:
     Properties:
       CodeUri: polybotCommand/
       Handler: app.lambda_handler
-      Runtime: python3.7
       Architectures:
       - x86_64
       Timeout: 60
       MemorySize: 2048
       Layers:
         - Ref: SrcLayer
-        - Ref: ChromiumLayer
       Environment:
         Variables:
-          PYTHONPATH: "/var/task/src:/opt/python"
-          PATH: "/opt/bin/chrome-linux:/opt/bin:/opt/bin/lib"
-          BUCKET: !Ref Bucket
-          SCREENSHOT_PATH: screenshots
-          S3WEB: !Sub "http://${Bucket}.s3-website.${AWS::Region}.amazonaws.com"
+          CHROMIUM_SCREENSHOT_ARN: !GetAtt ChromiumScreenshot.Arn
       Events:
         Api:
           Type: Api
           Properties:
             Path: /polybotCommand
+            Method: GET
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - s3:*
+              Resource: 
+                - !Sub 'arn:aws:s3:::${Bucket}'
+                - !Sub 'arn:aws:s3:::${Bucket}/*'
+            - Effect: Allow
+              Action:
+                - lambda:InvokeFunction
+              Resource:
+                - !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:*'
+
+  ChromiumScreenshot:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: chromiumCommands/
+      Handler: screenshot.app.lambda_handler
+      Runtime: python3.7
+      Architectures:
+      - x86_64
+      Timeout: 60
+      MemorySize: 2048
+      Layers:
+        - Ref: ChromiumLayer
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /chromium/screenshot
             Method: GET
       Policies:
         - Version: '2012-10-17'
