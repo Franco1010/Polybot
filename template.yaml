@@ -121,9 +121,11 @@ Resources:
       MemorySize: 2048
       Layers:
         - Ref: SrcLayer
+      Tracing: Active
       Environment:
         Variables:
           CHROMIUM_SCREENSHOT_ARN: !GetAtt ChromiumScreenshot.Arn
+          SPACES_DB: !Ref SpacesDB
       Events:
         Api:
           Type: Api
@@ -144,6 +146,14 @@ Resources:
                 - lambda:InvokeFunction
               Resource:
                 - !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:*'
+            - Effect: Allow
+              Action:
+              - secretsmanager:GetSecretValue
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                  - dynamodb:*
+              Resource: '*'
 
   ChromiumScreenshot:
     Type: AWS::Serverless::Function
