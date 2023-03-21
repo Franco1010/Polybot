@@ -1,5 +1,6 @@
 import json
 import utils
+import asyncio
 from clickMenu.menu import cli
 
 
@@ -10,7 +11,11 @@ def lambda_handler(event, context):
     utils.Logger.startBotStdout()
 
     try:
-        cli(event["queryStringParameters"]["command"].split(), standalone_mode=False)
+        asyncio.get_event_loop().run_until_complete(
+            cli(
+                event["queryStringParameters"]["command"].split(), standalone_mode=False
+            )
+        )
     except Exception as e:
         print(e)
 

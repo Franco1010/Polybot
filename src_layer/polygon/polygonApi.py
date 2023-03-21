@@ -1,20 +1,21 @@
 import logging
 import aiohttp
-import endpoints as URL
-import utils
+from . import endpoints as URL
+from . import utils
 import time
 import hashlib
 import random
 import string
+import boto3
+import json
 from urllib.parse import urlencode, quote
-from dotenv import load_dotenv
-import os
 
-load_dotenv()
+
 logger = logging.getLogger(__name__)
 
-POLYGON_API_KEY = os.getenv("POLYGON_API_KEY")
-POLYGON_SECRET = os.getenv("POLYGON_SECRET")
+secrets_client = boto3.client("secretsmanager")
+secret_value = secrets_client.get_secret_value(SecretId="api/polygon")
+apiPolygonSecret = json.loads(secret_value["SecretString"])
 
 
 def make_from_dict(namedtuple_cls, dict_):
@@ -28,7 +29,7 @@ def prepare_url(parameters_original, method_name):
     parameters = parameters_original.copy()
     # Add "time" and "apiKey" parameter
     parameters["time"] = sec
-    parameters["apiKey"] = POLYGON_API_KEY
+    parameters["apiKey"] = apiPolygonSecret["key"]
     # Add "problemproblemId" parameter only if it is a prob
     # if not (method_name == "problems.list" or method_name == "contest.problems"):
     #     parameters["problemId"] = PROBLEM_ID
@@ -61,7 +62,7 @@ def prepare_url(parameters_original, method_name):
         first = False
 
     rand_prefix = generate_random_prefix(6)
-    to_hash = rand_prefix + "/" + common_part + "#" + POLYGON_SECRET
+    to_hash = rand_prefix + "/" + common_part + "#" + apiPolygonSecret["secret"]
     hashed_string = create_sha512_hash(to_hash)
     request_url = (
         URL.BASE_URL + common_part_escaped + "&apiSig=" + rand_prefix + hashed_string
@@ -79,12 +80,11 @@ def create_sha512_hash(s):
 
 
 async def make_api_call(url):
-    print(url)
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             if response.status == 200:
                 data = await response.json(content_type="text/html")
-                print(data)
+                print(data["result"])
                 if "result" in data:
                     return data["result"]
                 return "ok"
@@ -92,7 +92,7 @@ async def make_api_call(url):
                 return None
 
 
-async def list():
+async def list_problems():
     params = {}
     url = prepare_url(params, URL.PROBLEMS_LIST_EP)
     resp = await make_api_call(url)
@@ -168,13 +168,12 @@ async def files(problemId):
     url = prepare_url(params, URL.PROBLEM_FILES_EP)
     resp = await make_api_call(url)
     files = []
-    files.append([make_from_dict(utils.File, file) for file in resp["resourceFile"]])
-    files.append([make_from_dict(utils.File, file) for file in resp["sourceFiles"]])
-    files.append([make_from_dict(utils.File, file) for file in resp["auxFiles"]])
-    for file in files:
-        file["ResourceAdvancedProperties"] = make_from_dict(
-            utils.ResourceAdvancedProperties, file["ResourceAdvancedProperties"]
-        )
+    for file in resp["resourceFiles"]:
+        files.append(make_from_dict(utils.File, file))
+    for file in resp["sourceFiles"]:
+        files.append(make_from_dict(utils.File, file))
+    for file in resp["auxFiles"]:
+        files.append(make_from_dict(utils.File, file))
     return files
 
 

@@ -3,6 +3,7 @@ import json
 import boto3
 import os
 import utils
+from . import problem
 
 BUCKET = os.environ["BUCKET"]
 S3WEB = os.environ["S3WEB"]
@@ -50,3 +51,6 @@ def screenshot(url):
     res = body_dict["response"]
     click.echo("fixed: {}".format(utils.shortPublicS3Url(BUCKET, S3WEB, res["fixed"])))
     click.echo("full: {}".format(utils.shortPublicS3Url(BUCKET, S3WEB, res["full"])))
+
+
+cli.add_command(problem.problem)

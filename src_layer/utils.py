@@ -2,6 +2,7 @@ import random
 import string
 import sys
 import boto3
+import json
 
 s3 = boto3.client("s3")
 original_stdout = sys.stdout
@@ -56,3 +57,9 @@ def shortPublicS3Url(Bucket, BucketWeb, Key):
     shortKey = "public/{}".format(generate_random_alphanumeric(10))
     s3.put_object(Bucket=Bucket, Key=shortKey, WebsiteRedirectLocation=presignedUrl)
     return "{}/{}".format(BucketWeb, shortKey)
+
+
+def getSecret(secretId):
+    secrets_client = boto3.client("secretsmanager")
+    secret_value = secrets_client.get_secret_value(SecretId=secretId)
+    return json.loads(secret_value["SecretString"])
