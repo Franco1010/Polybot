@@ -4,6 +4,7 @@ import boto3
 import os
 import utils
 from . import problem
+from . import contest
 
 BUCKET = os.environ["BUCKET"]
 S3WEB = os.environ["S3WEB"]
@@ -48,3 +49,4 @@ async def screenshot(url):
 
 
 cli.add_command(problem.problem)
+cli.add_command(problem.contest)
