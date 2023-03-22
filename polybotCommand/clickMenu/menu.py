@@ -12,12 +12,12 @@ CHROMIUM_SCREENSHOT_ARN = os.environ["CHROMIUM_SCREENSHOT_ARN"]
 
 
 @click.group()
-def cli():
+async def cli():
     pass
 
 
 @cli.command()
-def help():
+async def help():
     """Show this message and exit."""
 
     ctx = click.Context(cli)
@@ -26,7 +26,7 @@ def help():
 
 @cli.command()
 @click.argument("url")
-def screenshot(url):
+async def screenshot(url):
     """Take a screenshot of an URL."""
 
     lambda_client = boto3.client("lambda")

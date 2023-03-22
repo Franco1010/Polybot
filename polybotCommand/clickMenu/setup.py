@@ -8,7 +8,7 @@ import awsUtils.dynamoSpacesDB as spacesDB
 
 @click.group()
 @click.pass_context
-def setup(ctx):
+async def setup(ctx):
     pass
 
 
