@@ -11,6 +11,13 @@ async def contest():
 
 
 @contest.command()
+def help():
+    """Show this message and exit."""
+    ctx = click.Context(contest)
+    click.echo(ctx.get_help())
+
+
+@contest.command()
 async def contests_list():
     pass
 
