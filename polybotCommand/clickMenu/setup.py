@@ -22,6 +22,7 @@ async def help():
 @setup.command()
 @click.pass_context
 async def create(ctx):
+    """Create a new group and add this server to that group"""
     click.echo(ctx.obj)
     id = spacesDB.createItem(ctx.obj["spaceId"], ctx.obj["spaceApp"])
     click.echo(id)
@@ -30,4 +31,4 @@ async def create(ctx):
 @setup.command()
 @click.pass_context
 async def add():
-    """Take a screenshot of an URL."""
+    """Add this server to a group."""
