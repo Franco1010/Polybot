@@ -49,4 +49,4 @@ async def screenshot(url):
 
 
 cli.add_command(problem.problem)
-cli.add_command(problem.contest)
+cli.add_command(contest.contest)
