@@ -11,7 +11,7 @@ async def contest():
 
 
 @contest.command()
-def help():
+async def help():
     """Show this message and exit."""
     ctx = click.Context(contest)
     click.echo(ctx.get_help())

@@ -9,7 +9,7 @@ async def problem():
 
 
 @problem.command()
-def help():
+async def help():
     """Show this message and exit."""
     ctx = click.Context(problem)
     click.echo(ctx.get_help())
