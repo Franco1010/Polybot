@@ -83,6 +83,14 @@ class WebDriver:
 
         return chrome_options
 
+    def getDriver(self, chrome_options=None):
+        if chrome_options is None:
+            chrome_options = self.__get_default_chrome_options()
+        driver = webdriver.Chrome(
+            executable_path="/opt/bin/chromedriver", chrome_options=chrome_options
+        )
+        return driver
+
     def __get_correct_height(self, url, width=1280):
         chrome_options = self.__get_default_chrome_options()
         chrome_options.add_argument("--window-size={}x{}".format(width, 1024))

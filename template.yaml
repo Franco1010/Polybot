@@ -14,6 +14,7 @@ Globals:
         BUCKET: !Ref Bucket
         SCREENSHOT_PATH: screenshots
         S3WEB: !Sub "http://${Bucket}.s3-website.${AWS::Region}.amazonaws.com"
+        POLYGON_WEBSITE: 'https://polygon.codeforces.com/'
 
 Resources:
   # --------------------- STORAGE ---------------------
@@ -125,6 +126,7 @@ Resources:
       Environment:
         Variables:
           CHROMIUM_SCREENSHOT_ARN: !GetAtt ChromiumScreenshot.Arn
+          CHROMIUM_CREATE_POLYGON_PACKAGE_ARN: !GetAtt ChromiumCreatePolygonPackage.Arn
           SPACES_DB: !Ref SpacesDB
       Events:
         Api:
@@ -182,6 +184,32 @@ Resources:
               Resource: 
                 - !Sub 'arn:aws:s3:::${Bucket}'
                 - !Sub 'arn:aws:s3:::${Bucket}/*'
+
+  ChromiumCreatePolygonPackage:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: chromiumCommands/
+      Handler: createPolygonPackage.app.lambda_handler
+      Runtime: python3.7
+      Architectures:
+      - x86_64
+      Timeout: 120
+      MemorySize: 2048
+      Layers:
+        - Ref: ChromiumLayer
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /chromium/createPolygonPackage
+            Method: GET
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+              - secretsmanager:GetSecretValue
+              Resource: '*'
 
   # --------------------- LAYERS ---------------------
   SrcLayer:

@@ -4,13 +4,13 @@ import polygon.polygonApi as PolygonApi
 
 
 @click.group()
-def problem():
+async def problem():
     pass
 
 
 @problem.command()
 @click.argument("contestid")
-def create(contestid):
+async def create(contestid):
     pass
 
 
@@ -42,5 +42,5 @@ async def see_files(contestid, problemid):
 @click.argument("contestid")
 @click.argument("problemid")
 @click.argument("packageid")
-def see_package(contestid, problemid, packageid):
+async def see_package(contestid, problemid, packageid):
     pass
