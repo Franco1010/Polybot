@@ -16,7 +16,12 @@ client = discord.Client(intents=intents)
 
 
 async def send_message(message):
-    query_params = {"command": message.content[1:]}
+    query_params = {
+        "command": message.content[1:],
+        "id": message.guild.id,
+        "app": "discord",
+    }
+    print(message)
     query_string = urllib.parse.urlencode(query_params)
     url = POLYBOT_ENDPOINT + "?" + query_string
     print(url)

@@ -12,13 +12,7 @@ SCREENSHOT_PATH = os.environ["SCREENSHOT_PATH"]
 CHROMIUM_SCREENSHOT_ARN = os.environ["CHROMIUM_SCREENSHOT_ARN"]
 
 
-class CustomHelp(click.Group):
-    def get_help(self, ctx):
-        ctx.info_name = "!"
-        return super(CustomHelp, self).get_help(ctx)
-
-
-@click.group(cls=CustomHelp)
+@click.group()
 async def cli():
     pass
 

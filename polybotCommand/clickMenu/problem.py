@@ -9,6 +9,13 @@ async def problem():
 
 
 @problem.command()
+async def help():
+    """Show this message and exit."""
+    ctx = click.Context(problem)
+    click.echo(ctx.get_help())
+
+
+@problem.command()
 @click.argument("contestid")
 async def create(contestid):
     pass
