@@ -3,6 +3,8 @@ import json
 import boto3
 import os
 from tabulate import tabulate
+import awsUtils.dynamoContestsDB as contestsDB
+import awsUtils.dynamoSpacesDB as spacesDB
 
 
 @click.group()
@@ -19,18 +21,27 @@ async def help(ctx):
 
 
 @contest.command()
-async def contests_list():
-    pass
+@click.pass_context
+async def contests_list(ctx):
+    result = contestsDB.query_contests(ctx.obj["groupId"])
+    if len(result):
+        for i in result:
+            click.echo(i["name"] + " / " + i["source"])
+    else:
+        click.echo("Your group doesn't have contests")
 
 
 @contest.command()
+@click.pass_context
 async def create_contest():
     pass
 
 
 @contest.command()
+@click.pass_context
 @click.argument("contestid")
-async def add_contest(contestId):
+@click.option("--done", is_flag=True)
+async def add_contest(contestid, done):
     pass
 
 

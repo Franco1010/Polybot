@@ -6,27 +6,28 @@ from clickMenu.setup import setup
 import awsUtils.dynamoSpacesDB as spacesDB
 
 
-def has_group(id, app):
+def get_group(id, app):
     res = spacesDB.query(id, app)
-    return len(res) > 0
+    if len(res) > 0:
+        return res[0]["groupId"]
+    else:
+        return None
 
 
 def lambda_handler(event, context):
     print(event, context)
-    print("received command: ", event["queryStringParameters"]["command"].split())
 
-    context_extra = {
-        "spaceId": event["queryStringParameters"]["id"],
-        "spaceApp": event["queryStringParameters"]["app"],
-    }
+    # Cargar el JSON del cuerpo de la solicitud
+    request_data = json.loads(event["body"])
 
-    commandsGroup = (
-        cli
-        if has_group(
-            event["queryStringParameters"]["id"], event["queryStringParameters"]["app"]
-        )
-        else setup
+    print("received command: ", request_data["command"].split())
+
+    request_data["groupId"] = get_group(
+        request_data["callerCtx"]["space"]["id"],
+        request_data["callerCtx"]["space"]["app"],
     )
+
+    commandsGroup = cli if request_data["groupId"] != None else setup
 
     # starts file logger
     utils.Logger.startBotStdout()
@@ -34,11 +35,11 @@ def lambda_handler(event, context):
     try:
         asyncio.get_event_loop().run_until_complete(
             commandsGroup(
-                event["queryStringParameters"]["command"].split(),
+                request_data["command"].split(),
                 prog_name="!",
                 help_option_names=["--help", "--h"],
                 standalone_mode=False,
-                obj=context_extra,
+                obj=request_data,
             )
         )
     except Exception as e:
