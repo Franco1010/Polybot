@@ -35,10 +35,7 @@ async def send_message(message):
             response_json = await response.json()
             channel = message.channel
             print(response_json)
-            await channel.send(
-                "----------------CRYSTAALROO ---------------- \n"
-                + response_json["response"]
-            )
+            await channel.send(response_json["response"])
 
 
 @client.event
