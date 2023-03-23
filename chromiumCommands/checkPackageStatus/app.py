@@ -18,7 +18,7 @@ secret_value = secrets_client.get_secret_value(SecretId="account/polygon")
 accountPolygonSecret = json.loads(secret_value["SecretString"])
 
 
-def createPolygonPackage(contestId):
+def checkPackageStatus(contestId):
     webDriver = WebDriver()
     driver = webDriver.getDriver()
 
@@ -46,18 +46,22 @@ def createPolygonPackage(contestId):
 
     driver.get(
         POLYGON_WEBSITE
-        + "contest/"
-        + "build-packages?"
+        + "contest?"
         + "contestId={}".format(contestId)
-        + "&createFull=true"
-        + "&doValidation=true"
         + "&ccid={}".format(ccid_value)
     )
 
-    print(driver.page_source)
-    wait.until(EC.presence_of_element_located((By.ID, "top-messagebox")))
-    response = wait.until(EC.visibility_of_element_located((By.ID, "top-messagebox")))
-    response = response.text
+    idx_cells = driver.find_elements(
+        By.XPATH, '//table[@class="grid tablesorter problem-list-grid"]//tbody/tr/td[5]'
+    )
+    revision_cells = driver.find_elements(
+        By.XPATH, '//table[@class="grid tablesorter problem-list-grid"]//tbody/tr/td[7]'
+    )
+
+    response = {}
+    for idx_cell, revision_cell in zip(idx_cells, revision_cells):
+        x, y = revision_cell.text.split("/")
+        response[idx_cell.text] = {"curRevision": x, "packageRevision": y}
 
     driver.close()
     return response
@@ -66,7 +70,7 @@ def createPolygonPackage(contestId):
 def lambda_handler(event, context):
     print("event: ", event)
     print("context: ", context)
-    response = createPolygonPackage(event["queryStringParameters"]["contestId"])
+    response = checkPackageStatus(event["queryStringParameters"]["contestId"])
     return {
         "statusCode": 200,
         "headers": {"Content-Type": "application/json"},

@@ -13,16 +13,16 @@ CHROMIUM_SCREENSHOT_ARN = os.environ["CHROMIUM_SCREENSHOT_ARN"]
 
 
 @click.group()
-async def cli():
+@click.pass_context
+async def cli(ctx):
     pass
 
 
 @cli.command()
-async def help():
+@click.pass_context
+async def help(ctx):
     """Show this message and exit."""
-
-    ctx = click.Context(cli)
-    click.echo(ctx.get_help())
+    click.echo(cli.get_help(ctx))
 
 
 @cli.command()
