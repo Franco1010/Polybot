@@ -23,9 +23,9 @@ async def help(ctx):
     click.echo(contest.get_help(ctx))
 
 
-@contest.command()
+@contest.command(name="list")
 @click.pass_context
-async def list(ctx):
+async def contest_list(ctx):
     result = contestsDB.query_contests(ctx.obj["groupId"])
     if len(result):
         data = []
