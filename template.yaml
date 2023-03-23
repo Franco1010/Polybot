@@ -66,19 +66,21 @@ Resources:
           AttributeType: "S"
         - AttributeName: "source"
           AttributeType: "S"
-        - AttributeName: "group_id"
-          AttributeType: "S"      
+        - AttributeName: "groupId"
+          AttributeType: "S" 
+        - AttributeName: "tableId"
+          AttributeType: "S"     
       KeySchema: 
         - AttributeName: "id"
           KeyType: "HASH"
         - AttributeName: "source"
           KeyType: "RANGE"
       GlobalSecondaryIndexes:
-        - IndexName: "group_contests"
+        - IndexName: "groupContests"
           KeySchema:
-            - AttributeName: "group_id"
+            - AttributeName: "groupId"
               KeyType: "HASH"
-            - AttributeName: 'id'
+            - AttributeName: 'tableId'
               KeyType: "RANGE"
           Projection:
             ProjectionType: "ALL"
@@ -92,23 +94,44 @@ Resources:
           AttributeType: "S"
         - AttributeName: "app"
           AttributeType: "S"
-        - AttributeName: "group_id"
-          AttributeType: "S"  
+        - AttributeName: "groupId"
+          AttributeType: "S" 
+        - AttributeName: "tableId"
+          AttributeType: "S" 
       KeySchema: 
         - AttributeName: "id"
           KeyType: "HASH"
         - AttributeName: "app"
           KeyType: "RANGE"
       GlobalSecondaryIndexes:
-        - IndexName: "group_spaces"
+        - IndexName: "groupSpaces"
           KeySchema:
-            - AttributeName: 'group_id'
+            - AttributeName: 'groupId'
               KeyType: 'HASH'
-            - AttributeName: 'id'
+            - AttributeName: 'tableId'
               KeyType: 'RANGE'
           Projection:
             ProjectionType: 'ALL'
       BillingMode: 'PAY_PER_REQUEST'
+      
+  ContestRequestsDB: 
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      AttributeDefinitions: 
+        - AttributeName: "groupId"
+          AttributeType: "S" 
+        - AttributeName: "id"
+          AttributeType: "S"  
+      KeySchema: 
+        - AttributeName: "id"
+          KeyType: "HASH"
+        - AttributeName: "groupId"
+          KeyType: "RANGE"
+      BillingMode: 'PAY_PER_REQUEST'
+      TimeToLiveSpecification:
+        AttributeName: "TimeToLive"
+        Enabled: "TRUE"
+
 
   # --------------------- LAMBDAS ---------------------
   PolybotCommand:
@@ -129,12 +152,13 @@ Resources:
           CHROMIUM_CREATE_POLYGON_PACKAGE_ARN: !GetAtt ChromiumCreatePolygonPackage.Arn
           CHROMIUM_CHECK_PACKAGE_STATUS_ARN: !GetAtt ChromiumCheckPackageStatus.Arn
           SPACES_DB: !Ref SpacesDB
+          CONTESTS_DB: !Ref ContestsDB
       Events:
         Api:
           Type: Api
           Properties:
             Path: /polybotCommand
-            Method: GET
+            Method: POST
       Policies:
         - Version: '2012-10-17'
           Statement:

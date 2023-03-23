@@ -3,8 +3,7 @@ import json
 import boto3
 import os
 import utils
-from . import problem
-from . import contest
+from .polygon import polygon
 
 BUCKET = os.environ["BUCKET"]
 S3WEB = os.environ["S3WEB"]
@@ -48,5 +47,4 @@ async def screenshot(url):
     click.echo("full: {}".format(utils.shortPublicS3Url(BUCKET, S3WEB, res["full"])))
 
 
-cli.add_command(problem.problem)
-cli.add_command(contest.contest)
+cli.add_command(polygon.polygon)

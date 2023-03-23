@@ -17,7 +17,16 @@ def query(id, app):
     return response["Items"]
 
 
-def createItem(id, app):
+def create_item(id, app, name):
     groupId = str(uuid.uuid4())
-    table.put_item(Item={"id": id, "app": app, "group_id": groupId})
+    tableId = str(uuid.uuid4())
+    table.put_item(
+        Item={
+            "id": id,
+            "app": app,
+            "name": name,
+            "groupId": groupId,
+            "tableId": tableId,
+        }
+    )
     return groupId
