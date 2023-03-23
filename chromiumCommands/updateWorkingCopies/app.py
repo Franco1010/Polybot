@@ -18,7 +18,7 @@ secret_value = secrets_client.get_secret_value(SecretId="account/polygon")
 accountPolygonSecret = json.loads(secret_value["SecretString"])
 
 
-def createPolygonPackage(contestId):
+def updateWorkingCopies(contestId):
     webDriver = WebDriver()
     driver = webDriver.getDriver()
 
@@ -42,15 +42,12 @@ def createPolygonPackage(contestId):
     )
     ccid_value = ccid_input.get_attribute("value")
 
-    # GO TO CONTEST PAGE
-
+    # CLICK "UPDATE WORKING COPIES" ON CONTEST PAGE
     driver.get(
         POLYGON_WEBSITE
-        + "contest/"
-        + "build-packages?"
+        + "contest?"
         + "contestId={}".format(contestId)
-        + "&createFull=true"
-        + "&doValidation=true"
+        + "&action=update-working-copies"
         + "&ccid={}".format(ccid_value)
     )
 
@@ -65,7 +62,7 @@ def createPolygonPackage(contestId):
 def lambda_handler(event, context):
     print("event: ", event)
     print("context: ", context)
-    response = createPolygonPackage(event["queryStringParameters"]["contestId"])
+    response = updateWorkingCopies(event["queryStringParameters"]["contestId"])
     return {
         "statusCode": 200,
         "headers": {"Content-Type": "application/json"},
