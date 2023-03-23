@@ -3,9 +3,11 @@ import json
 import boto3
 import os
 import utils
+import uuid
 from tabulate import tabulate
 import awsUtils.dynamoContestsDB as contestsDB
-import awsUtils.dynamoSpacesDB as spacesDB
+import awsUtils.dynamoContestRequestsDB as contestRequestDB
+import polygon.polygonApi as PolygonApi
 
 
 @click.group()
@@ -21,20 +23,28 @@ async def help(ctx):
     click.echo(contest.get_help(ctx))
 
 
-@contest.command()
+@contest.command(name="list")
 @click.pass_context
-async def contests_list(ctx):
+async def contest_list(ctx):
     result = contestsDB.query_contests(ctx.obj["groupId"])
     if len(result):
+        data = []
         for i in result:
-            click.echo(i["name"] + " / " + i["source"])
+            if i["source"] == "polygon":
+                data.append([i["name"], i["id"]])
+        table = (
+            "```\n"
+            + tabulate(data, headers=["Name", "Id"], tablefmt="pretty")
+            + "\n```"
+        )
+        click.echo(table)
     else:
         click.echo("Your group doesn't have contests")
 
 
 @contest.command()
 @click.pass_context
-async def create_contest():
+async def create():
     pass
 
 
@@ -42,14 +52,51 @@ async def create_contest():
 @click.pass_context
 @click.argument("contestid")
 @click.option("--done", is_flag=True)
-async def add_contest(contestid, done):
-    pass
+async def add(ctx, contestid, done):
+    if done:
+        res = await add_contest(contestid, ctx.obj["groupId"], ctx)
+        click.echo(res)
+        return
+    mine = is_mine(ctx.obj["groupId"], contestid)
+    if mine == 2:
+        click.echo("Contest is already on the group")
+        return
+    if mine == 1:
+        click.echo("Contest is already added to a group. You cannot added again")
+        return
+    contest = await PolygonApi.contest(contestid)
+    if contest is None:
+        click.echo("Polybot doesn't have access to this contest")
+        return
+    problemId = str(uuid.uuid4())
+    contestRequestDB.create_item(
+        contestid,
+        "polygon",
+        ctx.obj["groupId"],
+        ctx.obj["callerCtx"]["space"],
+        ctx.obj["callerCtx"]["channel"],
+        ctx.obj["callerCtx"]["author"],
+        problemId,
+    )
+    click.echo(
+        "Add a problem to the contest and change the statement name to: **"
+        + problemId
+        + "**"
+    )
+    click.echo("You have 3 minutes")
 
 
 @contest.command()
 @click.argument("contestid")
-async def see_contest(contestid):
-    pass
+async def see(ctx, contestid):
+    mine = is_mine(ctx.obj["groupId"], contestid)
+    if mine != 2:
+        click.echo("You don't have access to this contest")
+        return
+    contest = await PolygonApi.contest(contestid)
+    if contest == None:
+        click.echo("Contest is missing write access.")
+        return
 
 
 @contest.command()
@@ -162,3 +209,66 @@ async def download_package(ctx, contestid):
                 example_usage
             )
         )
+
+
+async def add_contest(contestId, groupId, ctx):
+    requests = contestRequestDB.query(groupId, contestId)
+    valid = [
+        req["auth"]
+        for req in requests
+        if (
+            req["space"] == ctx.obj["callerCtx"]["space"]
+            and req["channel"] == ctx.obj["callerCtx"]["channel"]
+            and req["author"] == ctx.obj["callerCtx"]["author"]
+        )
+    ]
+    if len(valid) == 0:
+        return "No add request pending."
+    update_working_copies(contestId)
+    contest = await PolygonApi.contest(contestId)
+    if contest == None:
+        return "Validation failed. Try again"
+    for c in contest:
+        statements = await PolygonApi.statements(c.id)
+        if statements == None:
+            continue
+        for s in statements:
+            click.echo(s.name)
+            if s.name in valid:
+                contestsDB.create_item(
+                    contestId,
+                    "polygon",
+                    "name",
+                    groupId,
+                )
+                return "Contest added"
+    return "Validation failed. Try again"
+
+
+def is_mine(groupId, contestId):
+    res = contestsDB.query(contestId, "polygon")
+    if len(res):
+        if res[0]["groupId"] == groupId:
+            return 2  # mine
+        return 1  # owned
+    return 0  # not owned
+
+
+def update_working_copies(contestid):
+    CHROMIUM_UPDATE_WORKING_COPIES_ARN = os.environ[
+        "CHROMIUM_UPDATE_WORKING_COPIES_ARN"
+    ]
+    lambda_client = boto3.client("lambda")
+    payload = {
+        "queryStringParameters": {
+            "contestId": contestid,
+        }
+    }
+    response = lambda_client.invoke(
+        FunctionName=CHROMIUM_UPDATE_WORKING_COPIES_ARN,
+        InvocationType="RequestResponse",
+        Payload=json.dumps(payload),
+    )
+    response_payload = json.loads(response["Payload"].read().decode("utf-8"))
+    body_dict = json.loads(response_payload["body"])
+    click.echo(body_dict["response"])
