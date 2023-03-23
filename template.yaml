@@ -127,6 +127,7 @@ Resources:
         Variables:
           CHROMIUM_SCREENSHOT_ARN: !GetAtt ChromiumScreenshot.Arn
           CHROMIUM_CREATE_POLYGON_PACKAGE_ARN: !GetAtt ChromiumCreatePolygonPackage.Arn
+          CHROMIUM_CHECK_PACKAGE_STATUS_ARN: !GetAtt ChromiumCheckPackageStatus.Arn
           SPACES_DB: !Ref SpacesDB
       Events:
         Api:
@@ -202,6 +203,32 @@ Resources:
           Type: Api
           Properties:
             Path: /chromium/createPolygonPackage
+            Method: GET
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+              - secretsmanager:GetSecretValue
+              Resource: '*'
+
+  ChromiumCheckPackageStatus:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: chromiumCommands/
+      Handler: checkPackageStatus.app.lambda_handler
+      Runtime: python3.7
+      Architectures:
+      - x86_64
+      Timeout: 120
+      MemorySize: 2048
+      Layers:
+        - Ref: ChromiumLayer
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /chromium/checkPackageStatus
             Method: GET
       Policies:
         - Version: '2012-10-17'

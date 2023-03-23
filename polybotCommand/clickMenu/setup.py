@@ -13,10 +13,10 @@ async def setup(ctx):
 
 
 @setup.command()
-async def help():
+@click.pass_context
+async def help(ctx):
     """Show this message and exit."""
-    ctx = click.Context(setup)
-    click.echo(ctx.get_help())
+    click.echo(setup.get_help(ctx))
 
 
 @setup.command()

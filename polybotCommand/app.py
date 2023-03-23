@@ -36,6 +36,7 @@ def lambda_handler(event, context):
             commandsGroup(
                 event["queryStringParameters"]["command"].split(),
                 prog_name="!",
+                help_option_names=["--help", "--h"],
                 standalone_mode=False,
                 obj=context_extra,
             )

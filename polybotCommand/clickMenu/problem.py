@@ -4,15 +4,16 @@ import polygon.polygonApi as PolygonApi
 
 
 @click.group()
-async def problem():
+@click.pass_context
+async def problem(ctx):
     pass
 
 
 @problem.command()
-async def help():
+@click.pass_context
+async def help(ctx):
     """Show this message and exit."""
-    ctx = click.Context(problem)
-    click.echo(ctx.get_help())
+    click.echo(problem.get_help(ctx))
 
 
 @problem.command()
