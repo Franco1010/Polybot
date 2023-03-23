@@ -2,6 +2,7 @@ import click
 import json
 import boto3
 import os
+import utils
 from tabulate import tabulate
 import awsUtils.dynamoContestsDB as contestsDB
 import awsUtils.dynamoSpacesDB as spacesDB
@@ -122,3 +123,42 @@ async def package_status(ctx, contestid):
             click.echo(
                 "If you just used this command, then wait and check the status again."
             )
+
+
+@contest.command()
+@click.pass_context
+@click.argument("contestid")
+async def download_package(ctx, contestid):
+    CHROMIUM_DOWNLOAD_PACKAGE_ARN = os.environ["CHROMIUM_DOWNLOAD_PACKAGE_ARN"]
+    BUCKET = os.environ["BUCKET"]
+    S3WEB = os.environ["S3WEB"]
+    lambda_client = boto3.client("lambda")
+    payload = {
+        "queryStringParameters": {
+            "contestId": contestid,
+        }
+    }
+    response = lambda_client.invoke(
+        FunctionName=CHROMIUM_DOWNLOAD_PACKAGE_ARN,
+        InvocationType="RequestResponse",
+        Payload=json.dumps(payload),
+    )
+    response_payload = json.loads(response["Payload"].read().decode("utf-8"))
+    body_dict = json.loads(response_payload["body"])
+    s3Key = body_dict["response"]
+    shortUrl = utils.shortPublicS3Url(BUCKET, S3WEB, s3Key)
+    click.echo("Latest package created: {}".format(shortUrl))
+    with click.Context(package_status) as temp_ctx:
+        temp_ctx.info_name = "package-status"
+        temp_ctx.parent = ctx.parent
+        example_usage = package_status.get_usage(temp_ctx).replace("\n", "")
+        example_usage = (
+            example_usage.replace("[OPTIONS]", "")
+            .replace("CONTESTID", contestid)
+            .strip()
+        )
+        click.echo(
+            "If you are not sure about your package being up to date, check package status:\n{}".format(
+                example_usage
+            )
+        )

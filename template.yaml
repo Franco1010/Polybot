@@ -13,6 +13,7 @@ Globals:
         PATH: "/opt/bin/chrome-linux:/opt/bin:/opt/bin/lib"
         BUCKET: !Ref Bucket
         SCREENSHOT_PATH: screenshots
+        PACKAGES_PATH: packages
         S3WEB: !Sub "http://${Bucket}.s3-website.${AWS::Region}.amazonaws.com"
         POLYGON_WEBSITE: 'https://polygon.codeforces.com/'
 
@@ -151,6 +152,7 @@ Resources:
           CHROMIUM_SCREENSHOT_ARN: !GetAtt ChromiumScreenshot.Arn
           CHROMIUM_CREATE_POLYGON_PACKAGE_ARN: !GetAtt ChromiumCreatePolygonPackage.Arn
           CHROMIUM_CHECK_PACKAGE_STATUS_ARN: !GetAtt ChromiumCheckPackageStatus.Arn
+          CHROMIUM_DOWNLOAD_PACKAGE_ARN: !GetAtt ChromiumDownloadPackage.Arn
           SPACES_DB: !Ref SpacesDB
           CONTESTS_DB: !Ref ContestsDB
       Events:
@@ -235,6 +237,38 @@ Resources:
               Action:
               - secretsmanager:GetSecretValue
               Resource: '*'
+
+  ChromiumDownloadPackage:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: chromiumCommands/
+      Handler: downloadPackage.app.lambda_handler
+      Runtime: python3.7
+      Architectures:
+      - x86_64
+      Timeout: 120
+      MemorySize: 2048
+      Layers:
+        - Ref: ChromiumLayer
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /chromium/downloadPackage
+            Method: GET
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+              - secretsmanager:GetSecretValue
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - s3:*
+              Resource: 
+                - !Sub 'arn:aws:s3:::${Bucket}'
+                - !Sub 'arn:aws:s3:::${Bucket}/*'
 
   ChromiumCheckPackageStatus:
     Type: AWS::Serverless::Function
