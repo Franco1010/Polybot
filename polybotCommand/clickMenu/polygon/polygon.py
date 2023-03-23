@@ -14,7 +14,7 @@ async def polygon(ctx):
 @click.pass_context
 async def help(ctx):
     """Show this message and exit."""
-    click.echo(problem.get_help(ctx))
+    click.echo(polygon.get_help(ctx))
 
 
 polygon.add_command(problem.problem)
