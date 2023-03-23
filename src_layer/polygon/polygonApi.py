@@ -84,10 +84,8 @@ async def make_api_call(url):
         async with session.get(url) as response:
             if response.status == 200:
                 data = await response.json(content_type="text/html")
-                print(data["result"])
                 if "result" in data:
                     return data["result"]
-                return "ok"
             else:
                 return None
 
@@ -116,9 +114,11 @@ async def statements(problemId):
     params = {"problemId": problemId}
     url = prepare_url(params, URL.PROBLEM_STATEMENTS_EP)
     resp = await make_api_call(url)
+    if resp == None:
+        return None
     return [
-        [language, make_from_dict(utils.Statement, statement)]
-        for language, statement in resp
+        make_from_dict(utils.Statement, statement)
+        for language, statement in resp.items()
     ]
 
 
@@ -130,7 +130,7 @@ async def statement_resources(problemId):
     params = {"problemId": problemId}
     url = prepare_url(params, URL.PROBLEM_STATEMENT_RESOURCES_EP)
     resp = await make_api_call(url)
-    files = [make_from_dict(File, file) for file in resp]
+    files = [make_from_dict(utils.File, file) for file in resp]
     for file in files:
         file["ResourceAdvancedProperties"] = make_from_dict(
             utils.ResourceAdvancedProperties, file["ResourceAdvancedProperties"]
@@ -210,3 +210,15 @@ async def packages(problemId):
     url = prepare_url(params, URL.PROBLEM_PACKAGES_EP)
     resp = await make_api_call(url)
     return [make_from_dict(utils.Package, pack_dict) for pack_dict in resp]
+
+
+async def contest(contestId):
+    params = {"contestId": contestId}
+    url = prepare_url(params, URL.CONTEST_PROBLEMS_EP)
+    resp = await make_api_call(url)
+    if resp is None:
+        return None
+    problems = []
+    for _, problem in resp.items():
+        problems.append(make_from_dict(utils.Problem, problem))
+    return problems

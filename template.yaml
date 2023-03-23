@@ -153,8 +153,10 @@ Resources:
           CHROMIUM_CREATE_POLYGON_PACKAGE_ARN: !GetAtt ChromiumCreatePolygonPackage.Arn
           CHROMIUM_CHECK_PACKAGE_STATUS_ARN: !GetAtt ChromiumCheckPackageStatus.Arn
           CHROMIUM_DOWNLOAD_PACKAGE_ARN: !GetAtt ChromiumDownloadPackage.Arn
+          CHROMIUM_UPDATE_WORKING_COPIES_ARN: !GetAtt ChromiumUpdateWorkingCopies.Arn
           SPACES_DB: !Ref SpacesDB
           CONTESTS_DB: !Ref ContestsDB
+          CONTEST_REQUESTS_DB: !Ref ContestRequestsDB
       Events:
         Api:
           Type: Api

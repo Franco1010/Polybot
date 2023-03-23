@@ -14,19 +14,17 @@ def query_contests(groupId):
     return response["Items"]
 
 
-def create_item(id, app, name):
-    groupId = str(uuid.uuid4())
+def create_item(id, source, name, groupId):
     tableId = str(uuid.uuid4())
     table.put_item(
         Item={
             "id": id,
-            "app": app,
+            "source": source,
             "name": name,
             "groupId": groupId,
             "tableId": tableId,
         }
     )
-    return groupId
 
 
 def query(id, source):
@@ -35,6 +33,7 @@ def query(id, source):
             ":xid": id,
             ":xsource": source,
         },
-        KeyConditionExpression="id = :xid AND app = :xsource",
+        KeyConditionExpression="#i = :xid AND #s = :xsource",
+        ExpressionAttributeNames={"#i": "id", "#s": "source"},
     )
     return response["Items"]
