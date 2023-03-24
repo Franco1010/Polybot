@@ -33,6 +33,7 @@ async def send_message(message):
         async with session.post(url, json=payload, timeout=timeout) as response:
             response_json = await response.json()
             print(response_json)
+            print(url)
             await message.reply(response_json["response"])
 
 

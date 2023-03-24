@@ -328,3 +328,15 @@ def get_contest_name(contestid):
     response_payload = json.loads(response["Payload"].read().decode("utf-8"))
     body_dict = json.loads(response_payload["body"])
     return body_dict["contestName"]
+
+
+async def tranlaste_word(word):
+    return word.upper()
+
+
+@contest.command()
+@click.pass_context
+@click.argument("text", nargs=-1)
+async def tranlaste_text(ctx, text):
+    for word in text:
+        click.echo(await tranlaste_word(str(word)))
