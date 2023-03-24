@@ -9,7 +9,14 @@ import string
 import boto3
 import json
 from urllib.parse import urlencode, quote
+import requests
+import uuid
+import os
 
+BUCKET = os.environ["BUCKET"]
+PACKAGES_PATH = os.environ["PACKAGES_PATH"]
+
+s3 = boto3.client("s3")
 
 logger = logging.getLogger(__name__)
 
@@ -211,6 +218,8 @@ async def packages(problemId):
     params = {"problemId": problemId}
     url = prepare_url(params, URL.PROBLEM_PACKAGES_EP)
     resp = await make_api_call(url)
+    if resp == None:
+        return None
     return [make_from_dict(utils.Package, pack_dict) for pack_dict in resp]
 
 
@@ -225,3 +234,33 @@ async def contest(contestId):
         problem["letter"] = letter
         problems.append(make_from_dict(utils.Problem, problem))
     return problems
+
+
+def download_package(problemId, packageId):
+    params = {"problemId": problemId, "packageId": packageId}
+    url = prepare_url(params, URL.PROBLEM_PACKAGE_EP)
+    session = requests.Session()
+
+    response = session.get(url, stream=True, allow_redirects=True)
+    response.raise_for_status()
+
+    s3_key = "{}/{}/{}".format(PACKAGES_PATH, str(uuid.uuid4()), "package")
+
+    head_response = session.head(url, allow_redirects=True)
+    content_type = head_response.headers.get("Content-Type", "application/octet-stream")
+
+    print("contentType: ", content_type)
+
+    with response as part:
+        part.raw.decode_content = True
+        conf = boto3.s3.transfer.TransferConfig(
+            multipart_threshold=10000, max_concurrency=4
+        )
+        s3.upload_fileobj(
+            part.raw,
+            BUCKET,
+            s3_key,
+            Config=conf,
+            ExtraArgs={"ContentType": content_type},
+        )
+    return s3_key
