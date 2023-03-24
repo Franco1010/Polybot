@@ -267,6 +267,32 @@ Resources:
               - secretsmanager:GetSecretValue
               Resource: '*'
 
+  ChromiumGetContestName:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: chromiumCommands/
+      Handler: getContestName.app.lambda_handler
+      Runtime: python3.7
+      Architectures:
+      - x86_64
+      Timeout: 120
+      MemorySize: 2048
+      Layers:
+        - Ref: ChromiumLayer
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /chromium/getContestName
+            Method: GET
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+              - secretsmanager:GetSecretValue
+              Resource: '*'
+
   ChromiumUpdateWorkingCopies:
     Type: AWS::Serverless::Function
     Properties:
