@@ -71,3 +71,16 @@ def add_user(contest_alias, contest_user):
     contest_class = omegaup.api.Contest(client=client_class)
     contest_class.addUser(contest_alias=contest_alias, usernameOrEmail=contest_user)
     return "User added"
+
+
+def get_scoreboard(contest_alias):
+    contest_class = omegaup.api.Contest(client=client_class)
+    contest = contest_class.adminDetails(contest_alias=contest_alias)
+    url = (
+        "https://omegaup.com/arena/"
+        + str(contest.alias)
+        + "/scoreboard/"
+        + str(contest.scoreboard_url_admin)
+        + "/"
+    )
+    return url
