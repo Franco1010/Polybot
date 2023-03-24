@@ -5,6 +5,8 @@ import polygon.polygonApi as PolygonApi
 from tabulate import tabulate
 import utils
 import os
+import json
+import boto3
 
 
 @click.group()
@@ -23,8 +25,15 @@ async def help(ctx):
 @problem.command()
 @click.argument("contestid")
 @click.pass_context
-async def create(contestid):
-    pass
+@click.argument("problemname")
+async def create(contestid, problemname):
+    res = create_problem(contestid, problemname)
+    click.echo(res["response"])
+    data = [["problemName", res["problemName"]], ["problemIdx", res["problemIdx"]]]
+    table = "```\n" + tabulate(data, tablefmt="pretty") + "\n```"
+    click.echo(table)
+    res = commit_changes(contestid, res["problemIdx"])
+    click.echo(res)
 
 
 @problem.command()
@@ -282,3 +291,45 @@ def is_mine(groupId, contestId):
             return 2  # mine
         return 1  # owned
     return 0  # not owned
+
+
+def create_problem(contestid, problemname):
+    CHROMIUM_CREATE_POLYGON_PROBLEM_ARN = os.environ[
+        "CHROMIUM_CREATE_POLYGON_PROBLEM_ARN"
+    ]
+    lambda_client = boto3.client("lambda")
+    payload = {
+        "queryStringParameters": {
+            "contestId": contestid,
+            "problemName": problemname,
+        }
+    }
+    response = lambda_client.invoke(
+        FunctionName=CHROMIUM_CREATE_POLYGON_PROBLEM_ARN,
+        InvocationType="RequestResponse",
+        Payload=json.dumps(payload),
+    )
+    response_payload = json.loads(response["Payload"].read().decode("utf-8"))
+    body_dict = json.loads(response_payload["body"])
+    return body_dict
+
+
+def commit_changes(contestid, problemidx):
+    CHROMIUM_POLYGON_COMMIT_CHANGES_ARN = os.environ[
+        "CHROMIUM_POLYGON_COMMIT_CHANGES_ARN"
+    ]
+    lambda_client = boto3.client("lambda")
+    payload = {
+        "queryStringParameters": {
+            "contestId": contestid,
+            "problemIdx": problemidx,
+        }
+    }
+    response = lambda_client.invoke(
+        FunctionName=CHROMIUM_POLYGON_COMMIT_CHANGES_ARN,
+        InvocationType="RequestResponse",
+        Payload=json.dumps(payload),
+    )
+    response_payload = json.loads(response["Payload"].read().decode("utf-8"))
+    body_dict = json.loads(response_payload["body"])
+    return body_dict["response"]
