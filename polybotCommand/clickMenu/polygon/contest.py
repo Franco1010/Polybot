@@ -44,8 +44,39 @@ async def contest_list(ctx):
 
 @contest.command()
 @click.pass_context
-async def create():
-    pass
+@click.argument("name", type=str)
+@click.option("--location", type=str, default=None)
+@click.option("--date", type=str, default=None)
+async def create(ctx, name, location, date):
+    """Start new contest development in polygon"""
+    CHROMIUM_CREATE_POLYGON_CONTEST = os.environ["CHROMIUM_CREATE_POLYGON_CONTEST"]
+    lambda_client = boto3.client("lambda")
+    payload = {
+        "queryStringParameters": {
+            "name": name,
+            "location": location,
+            "date": date,
+        }
+    }
+    response = lambda_client.invoke(
+        FunctionName=CHROMIUM_CREATE_POLYGON_CONTEST,
+        InvocationType="RequestResponse",
+        Payload=json.dumps(payload),
+    )
+    response_payload = json.loads(response["Payload"].read().decode("utf-8"))
+    body_dict = json.loads(response_payload["body"])
+    response = body_dict["response"]
+    contestId = body_dict["contestId"]
+    click.echo(response)
+
+    if response == "Contest has been created":
+        click.echo("contestId: {}".format(contestId))
+        contestsDB.create_item(
+            contestId,
+            "polygon",
+            "name",
+            ctx.obj["groupId"],
+        )
 
 
 @contest.command()

@@ -40,6 +40,7 @@ def lambda_handler(event, context):
                 help_option_names=["--help", "--h"],
                 standalone_mode=False,
                 obj=request_data,
+                show_default=True,
             )
         )
     except Exception as e:
