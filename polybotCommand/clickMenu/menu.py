@@ -4,7 +4,7 @@ import boto3
 import os
 import utils
 from .polygon import polygon
-from .omegaUp import omegaUp
+from .omegaUpWrapper import omegaUpWrapper
 
 BUCKET = os.environ["BUCKET"]
 S3WEB = os.environ["S3WEB"]
@@ -49,4 +49,4 @@ async def screenshot(url):
 
 
 cli.add_command(polygon.polygon)
-cli.add_command(omegaUp.omegaUp)
+cli.add_command(omegaUpWrapper.omegaUpWrapper)

@@ -8,7 +8,7 @@ from tabulate import tabulate
 
 import awsUtils.dynamoContestsDB as contestsDB
 import awsUtils.dynamoContestRequestsDB as contestRequestDB
-import omegaUp.omegaUpApi as OmegaUpApi
+import omegaUpWrapper.omegaUpApi as OmegaUpApi
 
 
 @click.group()
