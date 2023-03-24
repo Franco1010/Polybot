@@ -1,9 +1,7 @@
 import discord
 import aiohttp
-import urllib.parse
 import os
 from dotenv import load_dotenv
-import json
 
 load_dotenv()
 
@@ -33,9 +31,8 @@ async def send_message(message):
     async with aiohttp.ClientSession() as session:
         async with session.post(url, json=payload) as response:
             response_json = await response.json()
-            channel = message.channel
             print(response_json)
-            await channel.send(response_json["response"])
+            await message.reply(response_json["response"])
 
 
 @client.event

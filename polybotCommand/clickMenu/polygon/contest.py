@@ -28,10 +28,7 @@ async def help(ctx):
 async def contest_list(ctx):
     result = contestsDB.query_contests(ctx.obj["groupId"])
     if len(result):
-        data = []
-        for i in result:
-            if i["source"] == "polygon":
-                data.append([i["name"], i["id"]])
+        data = [[r["name"], r["id"]] for r in result if r["source"] == "polygon"]
         table = (
             "```\n"
             + tabulate(data, headers=["Name", "Id"], tablefmt="pretty")
@@ -88,6 +85,7 @@ async def add(ctx, contestid, done):
 
 @contest.command()
 @click.argument("contestid")
+@click.pass_context
 async def see(ctx, contestid):
     mine = is_mine(ctx.obj["groupId"], contestid)
     if mine != 2:
@@ -97,6 +95,9 @@ async def see(ctx, contestid):
     if contest == None:
         click.echo("Contest is missing write access.")
         return
+    data = [[c.letter, c.name] for c in contest]
+    table = "```\n" + tabulate(data, headers=["#", "Name"], tablefmt="pretty") + "\n```"
+    click.echo(table)
 
 
 @contest.command()

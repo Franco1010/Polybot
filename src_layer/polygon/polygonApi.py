@@ -219,6 +219,7 @@ async def contest(contestId):
     if resp is None:
         return None
     problems = []
-    for _, problem in resp.items():
+    for letter, problem in resp.items():
+        problem["letter"] = letter
         problems.append(make_from_dict(utils.Problem, problem))
     return problems

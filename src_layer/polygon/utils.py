@@ -13,6 +13,7 @@ Problem = namedtuple(
         "revision",
         "latestPackage",
         "modified",
+        "letter",
     ],
 )
 
