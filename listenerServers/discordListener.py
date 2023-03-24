@@ -28,8 +28,9 @@ async def send_message(message):
         },
     }
     url = POLYBOT_ENDPOINT
+    timeout = aiohttp.ClientTimeout(total=60)
     async with aiohttp.ClientSession() as session:
-        async with session.post(url, json=payload) as response:
+        async with session.post(url, json=payload, timeout=timeout) as response:
             response_json = await response.json()
             print(response_json)
             await message.reply(response_json["response"])

@@ -156,6 +156,8 @@ Resources:
           CHROMIUM_UPDATE_WORKING_COPIES_ARN: !GetAtt ChromiumUpdateWorkingCopies.Arn
           CHROMIUM_CREATE_POLYGON_CONTEST: !GetAtt ChromiumCreatePolygonContest.Arn
           CHROMIUM_GET_CONTEST_NAME_ARN: !GetAtt ChromiumGetContestName.Arn
+          CHROMIUM_CREATE_POLYGON_PROBLEM_ARN: !GetAtt ChromiumCreatePolygonProblem.Arn
+          CHROMIUM_POLYGON_COMMIT_CHANGES_ARN: !GetAtt ChromiumPolygonCommitChanges.Arn
           SPACES_DB: !Ref SpacesDB
           CONTESTS_DB: !Ref ContestsDB
           CONTEST_REQUESTS_DB: !Ref ContestRequestsDB
@@ -259,6 +261,58 @@ Resources:
           Type: Api
           Properties:
             Path: /chromium/createPolygonContest
+            Method: GET
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+              - secretsmanager:GetSecretValue
+              Resource: '*'
+
+  ChromiumCreatePolygonProblem:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: chromiumCommands/
+      Handler: createPolygonProblem.app.lambda_handler
+      Runtime: python3.7
+      Architectures:
+      - x86_64
+      Timeout: 120
+      MemorySize: 2048
+      Layers:
+        - Ref: ChromiumLayer
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /chromium/createPolygonProblem
+            Method: GET
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+              - secretsmanager:GetSecretValue
+              Resource: '*'
+
+  ChromiumPolygonCommitChanges:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: chromiumCommands/
+      Handler: polygonCommitChanges.app.lambda_handler
+      Runtime: python3.7
+      Architectures:
+      - x86_64
+      Timeout: 120
+      MemorySize: 2048
+      Layers:
+        - Ref: ChromiumLayer
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /chromium/polygonCommitChanges
             Method: GET
       Policies:
         - Version: '2012-10-17'
