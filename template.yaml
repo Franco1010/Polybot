@@ -142,7 +142,7 @@ Resources:
       Handler: app.lambda_handler
       Architectures:
       - x86_64
-      Timeout: 60
+      Timeout: 120
       MemorySize: 2048
       Layers:
         - Ref: SrcLayer
