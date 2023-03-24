@@ -101,6 +101,8 @@ async def info(problemId):
     params = {"problemId": problemId}
     url = prepare_url(params, URL.PROBLEM_INFO_EP)
     resp = await make_api_call(url)
+    if resp == None:
+        return None
     return make_from_dict(utils.ProblemInfo, resp)
 
 
