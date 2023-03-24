@@ -155,6 +155,7 @@ Resources:
           CHROMIUM_DOWNLOAD_PACKAGE_ARN: !GetAtt ChromiumDownloadPackage.Arn
           CHROMIUM_UPDATE_WORKING_COPIES_ARN: !GetAtt ChromiumUpdateWorkingCopies.Arn
           CHROMIUM_CREATE_POLYGON_CONTEST: !GetAtt ChromiumCreatePolygonContest.Arn
+          CHROMIUM_GET_CONTEST_NAME_ARN: !GetAtt ChromiumGetContestName.Arn
           SPACES_DB: !Ref SpacesDB
           CONTESTS_DB: !Ref ContestsDB
           CONTEST_REQUESTS_DB: !Ref ContestRequestsDB

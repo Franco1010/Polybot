@@ -276,7 +276,7 @@ async def add_contest(contestId, groupId, ctx):
                 contestsDB.create_item(
                     contestId,
                     "polygon",
-                    "name",
+                    get_contest_name(contestId),
                     groupId,
                 )
                 return "Contest added"
@@ -310,3 +310,21 @@ def update_working_copies(contestid):
     response_payload = json.loads(response["Payload"].read().decode("utf-8"))
     body_dict = json.loads(response_payload["body"])
     click.echo(body_dict["response"])
+
+
+def get_contest_name(contestid):
+    CHROMIUM_GET_CONTEST_NAME_ARN = os.environ["CHROMIUM_GET_CONTEST_NAME_ARN"]
+    lambda_client = boto3.client("lambda")
+    payload = {
+        "queryStringParameters": {
+            "contestId": contestid,
+        }
+    }
+    response = lambda_client.invoke(
+        FunctionName=CHROMIUM_GET_CONTEST_NAME_ARN,
+        InvocationType="RequestResponse",
+        Payload=json.dumps(payload),
+    )
+    response_payload = json.loads(response["Payload"].read().decode("utf-8"))
+    body_dict = json.loads(response_payload["body"])
+    return body_dict["contestName"]
