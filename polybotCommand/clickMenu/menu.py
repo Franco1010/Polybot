@@ -4,7 +4,7 @@ import boto3
 import os
 import utils
 from .polygon import polygon
-from .omegaUpWrapper import omegaUpWrapper
+from .omegaUp import omegaUpWrapper
 
 BUCKET = os.environ["BUCKET"]
 S3WEB = os.environ["S3WEB"]
