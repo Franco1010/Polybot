@@ -1,6 +1,7 @@
 import json
 import utils
 import asyncio
+import shlex
 from clickMenu.menu import cli
 from clickMenu.setup import setup
 import awsUtils.dynamoSpacesDB as spacesDB
@@ -35,7 +36,7 @@ def lambda_handler(event, context):
     try:
         asyncio.get_event_loop().run_until_complete(
             commandsGroup(
-                request_data["command"].split(),
+                shlex.split(request_data["command"]),
                 prog_name="!",
                 help_option_names=["--help", "--h"],
                 standalone_mode=False,

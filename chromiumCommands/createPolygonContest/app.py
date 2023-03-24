@@ -3,6 +3,8 @@ import boto3
 import os
 import json
 import sys
+import re
+
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -78,9 +80,13 @@ def createPolygonContest(contestName, contestLocation, contestDate):
         "table.grid.tablesorter.contest-list-grid tbody tr"
     )
     contestId = first_row.find_elements_by_css_selector("td")[1].text
+    contestName_element = first_row.find_elements_by_css_selector("td")[2]
+    contestName = (
+        re.search(r"^(.+?)\s+problems", contestName_element.text).group(1).strip()
+    )
 
     driver.close()
-    return {"response": response, "contestId": contestId}
+    return {"response": response, "contestId": contestId, "contestName": contestName}
 
 
 def lambda_handler(event, context):

@@ -67,14 +67,20 @@ async def create(ctx, name, location, date):
     body_dict = json.loads(response_payload["body"])
     response = body_dict["response"]
     contestId = body_dict["contestId"]
+    contestName = body_dict["contestName"]
     click.echo(response)
 
     if response == "Contest has been created":
-        click.echo("contestId: {}".format(contestId))
+        data = [
+            ["contestId", contestId],
+            ["contestName", contestName],
+        ]
+        table = "```\n" + tabulate(data, tablefmt="pretty") + "\n```"
+        click.echo(table)
         contestsDB.create_item(
             contestId,
             "polygon",
-            "name",
+            contestName,
             ctx.obj["groupId"],
         )
 
