@@ -102,3 +102,38 @@ async def add_user(ctx, contest_id, username):
     username: Username of the contestant that will be added to the contest\n."""
     for user in username:
         click.echo(user + ":" + OmegaUpApi.add_user(contest_id, user))
+
+
+BUCKET = os.environ["BUCKET"]
+S3WEB = os.environ["S3WEB"]
+SCREENSHOT_PATH = os.environ["SCREENSHOT_PATH"]
+CHROMIUM_SCREENSHOT_ARN = os.environ["CHROMIUM_SCREENSHOT_ARN"]
+
+
+async def screenshot(url):
+    lambda_client = boto3.client("lambda")
+    payload = {
+        "queryStringParameters": {
+            "url": url,
+        }
+    }
+    response = lambda_client.invoke(
+        FunctionName=CHROMIUM_SCREENSHOT_ARN,
+        InvocationType="RequestResponse",
+        Payload=json.dumps(payload),
+    )
+    response_payload = json.loads(response["Payload"].read().decode("utf-8"))
+    body_dict = json.loads(response_payload["body"])
+    res = body_dict["response"]
+    click.echo("fixed: {}".format(utils.shortPublicS3Url(BUCKET, S3WEB, res["fixed"])))
+    click.echo("full: {}".format(utils.shortPublicS3Url(BUCKET, S3WEB, res["full"])))
+
+
+@contest.command()
+@click.argument("contest_id", type=str)
+async def show_scoreboard(contest_id):
+    """Show scoreboard of a contest.\n
+    contest_id: Id of the contest.\n."""
+    url = OmegaUpApi.get_scoreboard(contest_id)
+    click.echo(url)
+    await screenshot(url)
