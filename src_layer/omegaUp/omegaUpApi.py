@@ -65,3 +65,9 @@ def create_contest(
         languages=languages,
     )
     return "Contest created"
+
+
+def add_user(contest_alias, contest_user):
+    contest_class = omegaup.api.Contest(client=client_class)
+    contest_class.addUser(contest_alias=contest_alias, usernameOrEmail=contest_user)
+    return "User added"
