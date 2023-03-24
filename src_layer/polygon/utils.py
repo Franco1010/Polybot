@@ -25,7 +25,17 @@ ProblemInfo = namedtuple(
 
 Statement = namedtuple(
     "Statement",
-    ["encoding", "name", "legend", "input", "output", "scoring", "notes", "tutorial"],
+    [
+        "encoding",
+        "name",
+        "legend",
+        "input",
+        "output",
+        "scoring",
+        "notes",
+        "tutorial",
+        "lang",
+    ],
 )
 
 ResourceAdvancedProperties = namedtuple(
@@ -44,7 +54,7 @@ File = namedtuple(
 )
 
 Solution = namedtuple(
-    "Solution", ["name", "modificationTimeSeconds", "length", "source_type", "tag"]
+    "Solution", ["name", "modificationTimeSeconds", "length", "sourceType", "tag"]
 )
 
 Test = namedtuple(

@@ -125,14 +125,11 @@ async def statements(problemId):
     resp = await make_api_call(url)
     if resp == None:
         return None
-    return [
-        make_from_dict(utils.Statement, statement)
-        for language, statement in resp.items()
-    ]
-
-
-async def save_statement():
-    params = {}
+    res = []
+    for language, statement in resp.items():
+        statement["lang"] = language
+        res.append(make_from_dict(utils.Statement, statement))
+    return res
 
 
 async def statement_resources(problemId):
@@ -190,13 +187,17 @@ async def solutions(problemId):
     params = {"problemId": problemId}
     url = prepare_url(params, URL.PROBLEM_SOLUTIONS_EP)
     resp = await make_api_call(url)
+    if resp == None:
+        return None
     return [make_from_dict(utils.Solution, solutions_dict) for solutions_dict in resp]
 
 
-async def tests(problemId):
-    params = {"problemId": problemId}
+async def tests(problemId, testset):
+    params = {"problemId": problemId, "testset": testset}
     url = prepare_url(params, URL.PROBLEM_TESTS_EP)
     resp = await make_api_call(url)
+    if resp == None:
+        return None
     return [make_from_dict(utils.Test, test_dict) for test_dict in resp]
 
 
@@ -264,3 +265,36 @@ def download_package(problemId, packageId):
             ExtraArgs={"ContentType": content_type},
         )
     return s3_key
+
+
+async def save_solution(problemId, name, file, tag):
+    params = {"problemId": problemId, "name": name, "file": file, "tag": tag}
+    url = prepare_url(params, URL.PROBLEM_SAVE_SOLUTION_EP)
+    resp = await make_api_call(url)
+    return resp
+
+
+async def save_test(problemId, testset, testIndex, testInput):
+    params = {
+        "problemId": problemId,
+        "testset": testset,
+        "testIndex": testIndex,
+        "testInput": testInput,
+    }
+    url = prepare_url(params, URL.PROBLEM_SAVE_TEST_EP)
+    resp = await make_api_call(url)
+    return resp
+
+
+async def save_statement(problemId, lang, name, legend, input, output):
+    params = {
+        "problemId": problemId,
+        "lang": lang,
+        "name": name,
+        "legend": legend,
+        "input": input,
+        "output": output,
+    }
+    url = prepare_url(params, URL.PROBLEM_SAVE_STATEMENT_EP)
+    resp = await make_api_call(url)
+    return resp

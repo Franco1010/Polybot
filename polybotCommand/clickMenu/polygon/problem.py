@@ -22,6 +22,7 @@ async def help(ctx):
 
 @problem.command()
 @click.argument("contestid")
+@click.pass_context
 async def create(contestid):
     pass
 
@@ -95,16 +96,182 @@ async def download_package(ctx, contestid, problemid):
 @problem.command()
 @click.argument("contestid")
 @click.argument("problemid")
-async def see_statements(contestid, problemid):
-    res = await PolygonApi.statements(problemId=problemid)
+@click.argument("solution")
+@click.argument("tag")
+@click.pass_context
+async def add_solution(ctx, contestid, problemid, solution, tag):
+    mine = is_mine(ctx.obj["groupId"], contestid)
+    if mine != 2:
+        click.echo("Polybot doesn't have access to this problem")
+        return
+    contest = await PolygonApi.contest(contestid)
+    if contest == None:
+        click.echo("Contest is missing write access.")
+        return
+    p = None
+    for c in contest:
+        if c.letter == problemid:
+            p = c
+            break
+    if p == None:
+        click.echo("Problem is not in contest.")
+        return
+    res = await PolygonApi.save_solution(p.id, solution, tag)
     click.echo(res)
 
 
 @problem.command()
 @click.argument("contestid")
 @click.argument("problemid")
-async def see_files(contestid, problemid):
-    res = await PolygonApi.files(problemId=problemid)
+@click.argument("lang")
+@click.argument("name")
+@click.argument("legend")
+@click.argument("input")
+@click.argument("output")
+@click.pass_context
+async def add_statement(ctx, contestid, problemid, lang, name, legend, input, output):
+    mine = is_mine(ctx.obj["groupId"], contestid)
+    if mine != 2:
+        click.echo("Polybot doesn't have access to this problem")
+        return
+    contest = await PolygonApi.contest(contestid)
+    if contest == None:
+        click.echo("Contest is missing write access.")
+        return
+    p = None
+    for c in contest:
+        if c.letter == problemid:
+            p = c
+            break
+    if p == None:
+        click.echo("Problem is not in contest.")
+        return
+    res = await PolygonApi.save_statement(p.id, lang, name, legend, input, output)
+    click.echo(res)
+
+
+@problem.command()
+@click.argument("contestid")
+@click.argument("problemid")
+@click.argument("test")
+@click.pass_context
+async def add_test(ctx, contestid, problemid, test):
+    mine = is_mine(ctx.obj["groupId"], contestid)
+    if mine != 2:
+        click.echo("Polybot doesn't have access to this problem")
+        return
+    contest = await PolygonApi.contest(contestid)
+    if contest == None:
+        click.echo("Contest is missing write access.")
+        return
+    p = None
+    for c in contest:
+        if c.letter == problemid:
+            p = c
+            break
+    if p == None:
+        click.echo("Problem is not in contest.")
+        return
+    res = await PolygonApi.tests(p.id, "tests")
+    if res == None:
+        newtest = await PolygonApi.save_test(p.id, "tests", 1, test)
+        click.echo("1")
+        return
+    newtest = await PolygonApi.save_test(p.id, "test", len(res) + 1, test)
+    click.echo(len(res) + 1)
+
+
+@problem.command()
+@click.argument("contestid")
+@click.argument("problemid")
+@click.pass_context
+async def solutions(ctx, contestid, problemid):
+    mine = is_mine(ctx.obj["groupId"], contestid)
+    if mine != 2:
+        click.echo("Polybot doesn't have access to this problem")
+        return
+    contest = await PolygonApi.contest(contestid)
+    if contest == None:
+        click.echo("Contest is missing write access.")
+        return
+    p = None
+    for c in contest:
+        if c.letter == problemid:
+            p = c
+            break
+    if p == None:
+        click.echo("Problem is not in contest.")
+        return
+    res = await PolygonApi.solutions(p.id)
+    if res == None:
+        click.echo("Problem doesn't have solutions")
+        return
+    data = [[s.name, s.sourceType, s.tag] for s in res]
+    table = (
+        "```\n"
+        + tabulate(data, headers=["Name", "Source", "Tag"], tablefmt="pretty")
+        + "\n```"
+    )
+    click.echo(table)
+
+
+@problem.command()
+@click.argument("contestid")
+@click.argument("problemid")
+@click.pass_context
+async def statements(ctx, contestid, problemid):
+    mine = is_mine(ctx.obj["groupId"], contestid)
+    if mine != 2:
+        click.echo("Polybot doesn't have access to this problem")
+        return
+    contest = await PolygonApi.contest(contestid)
+    if contest == None:
+        click.echo("Contest is missing write access.")
+        return
+    p = None
+    for c in contest:
+        if c.letter == problemid:
+            p = c
+            break
+    if p == None:
+        click.echo("Problem is not in contest.")
+        return
+    res = await PolygonApi.statements(p.id)
+    if res == None:
+        click.echo("Problem doesn't have statements")
+        return
+    data = [[s.lang, s.name] for s in res]
+    table = (
+        "```\n"
+        + tabulate(data, headers=["Language", "Name"], tablefmt="pretty")
+        + "\n```"
+    )
+    click.echo(table)
+
+
+@problem.command()
+@click.argument("contestid")
+@click.argument("problemid")
+@click.argument("checker")
+@click.pass_context
+async def set_checker(ctx, contestid, problemid, checker):
+    mine = is_mine(ctx.obj["groupId"], contestid)
+    if mine != 2:
+        click.echo("Polybot doesn't have access to this problem")
+        return
+    contest = await PolygonApi.contest(contestid)
+    if contest == None:
+        click.echo("Contest is missing write access.")
+        return
+    p = None
+    for c in contest:
+        if c.letter == problemid:
+            p = c
+            break
+    if p == None:
+        click.echo("Problem is not in contest.")
+        return
+    res = await PolygonApi.set_checker(p.id, checker)
     click.echo(res)
 
 
