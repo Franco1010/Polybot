@@ -37,3 +37,8 @@ def create_contest(contest_id, contest_title, contest_start, contest_duration, c
         scoreboard = DEFAULT.SCOREBOARD
     contest_class.create(alias=alias, title=title, description=description, start_time=unix_start_time, finish_time=unix_end_time, scoreboard=scoreboard, points_decay_factor = DEFAULT.POINTS_DECAY_FACTOR, submissions_gap = DEFAULT.SUBMISSION_GAP, penalty=DEFAULT.PENALTY, feedback=DEFAULT.FEEDBACK, penalty_type=DEFAULT.PENALTY_TYPE, languages=languages)
     return "Contest created"
+
+def add_user(contest_alias, contest_user):
+    contest_class = omegaup.api.Contest(client=client_class)
+    contest_class.addUser(contest_alias=contest_alias, usernameOrEmail=contest_user)
+    return "User added"

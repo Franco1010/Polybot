@@ -4,11 +4,12 @@ import boto3
 import os
 import utils
 import uuid
-from tabulate import tabulate
+from tabulate import tabulate 
+
 import awsUtils.dynamoContestsDB as contestsDB
 import awsUtils.dynamoContestRequestsDB as contestRequestDB
 import omegaUp.omegaUpApi as OmegaUpApi
-
+ 
 
 @click.group()
 @click.pass_context
@@ -62,3 +63,14 @@ async def contest_list(ctx):
         click.echo(table)
     else:
         click.echo("Your group doesn't have contests")
+
+@contest.command()
+@click.pass_context
+@click.argument("contest_id", type=str)
+@click.argument("username", nargs=-1)
+async def add_user(ctx, contest_id, username):
+    """Add user to a contest.\n
+    contest_id: Id of the contest.
+    username: Username of the contestant that will be added to the contest\n. """
+    for user in username:
+        click.echo(user + ":" + OmegaUpApi.add_user(contest_id, user))
