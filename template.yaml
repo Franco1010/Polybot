@@ -154,6 +154,7 @@ Resources:
           CHROMIUM_CHECK_PACKAGE_STATUS_ARN: !GetAtt ChromiumCheckPackageStatus.Arn
           CHROMIUM_DOWNLOAD_PACKAGE_ARN: !GetAtt ChromiumDownloadPackage.Arn
           CHROMIUM_UPDATE_WORKING_COPIES_ARN: !GetAtt ChromiumUpdateWorkingCopies.Arn
+          CHROMIUM_CREATE_POLYGON_CONTEST: !GetAtt ChromiumCreatePolygonContest.Arn
           SPACES_DB: !Ref SpacesDB
           CONTESTS_DB: !Ref ContestsDB
           CONTEST_REQUESTS_DB: !Ref ContestRequestsDB
@@ -231,6 +232,32 @@ Resources:
           Type: Api
           Properties:
             Path: /chromium/createPolygonPackage
+            Method: GET
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+              - secretsmanager:GetSecretValue
+              Resource: '*'
+
+  ChromiumCreatePolygonContest:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: chromiumCommands/
+      Handler: createPolygonContest.app.lambda_handler
+      Runtime: python3.7
+      Architectures:
+      - x86_64
+      Timeout: 120
+      MemorySize: 2048
+      Layers:
+        - Ref: ChromiumLayer
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /chromium/createPolygonContest
             Method: GET
       Policies:
         - Version: '2012-10-17'
