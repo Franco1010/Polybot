@@ -32,7 +32,7 @@ async def send_message(message):
         async with session.post(url, json=payload) as response:
             response_json = await response.json()
             print(response_json)
-            await message.reply("--------------------------IvanBM---------------"+response_json["response"])
+            await message.reply(response_json["response"])
 
 
 @client.event
