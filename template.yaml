@@ -132,6 +132,21 @@ Resources:
       TimeToLiveSpecification:
         AttributeName: "TimeToLive"
         Enabled: "TRUE"
+  
+  RequestsDB: 
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      AttributeDefinitions: 
+        - AttributeName: "groupId"
+          AttributeType: "S"
+        - AttributeName: "requestId"
+          AttributeType: "S"
+      KeySchema: 
+        - AttributeName: "groupId"
+          KeyType: "HASH"
+        - AttributeName: "requestId"
+          KeyType: "RANGE"
+      BillingMode: 'PAY_PER_REQUEST'
 
 
   # --------------------- LAMBDAS ---------------------
@@ -161,6 +176,7 @@ Resources:
           SPACES_DB: !Ref SpacesDB
           CONTESTS_DB: !Ref ContestsDB
           CONTEST_REQUESTS_DB: !Ref ContestRequestsDB
+          REQUESTS_DB: !Ref RequestsDB
       Events:
         Api:
           Type: Api
