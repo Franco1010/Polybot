@@ -13,6 +13,7 @@ import polygon.polygonApi as PolygonApi
 @click.group()
 @click.pass_context
 async def contest(ctx):
+    """Polygon contest commands."""
     pass
 
 
@@ -26,6 +27,7 @@ async def help(ctx):
 @contest.command(name="list")
 @click.pass_context
 async def contest_list(ctx):
+    """List all group contests in polygon"""
     result = contestsDB.query_contests(ctx.obj["groupId"])
     if len(result):
         data = [[r["name"], r["id"]] for r in result if r["source"] == "polygon"]
@@ -87,6 +89,7 @@ async def create(ctx, name, location, date):
 @click.argument("contestid")
 @click.option("--done", is_flag=True)
 async def add(ctx, contestid, done):
+    """Add a polygon contest to the group"""
     if done:
         res = await add_contest(contestid, ctx.obj["groupId"], ctx)
         click.echo(res)
@@ -124,6 +127,7 @@ async def add(ctx, contestid, done):
 @click.argument("contestid")
 @click.pass_context
 async def see(ctx, contestid):
+    """See the problems of a polygon contest"""
     mine = is_mine(ctx.obj["groupId"], contestid)
     if mine != 2:
         click.echo("You don't have access to this contest")
@@ -140,6 +144,7 @@ async def see(ctx, contestid):
 @contest.command()
 @click.argument("contestid")
 async def create_package(contestid):
+    """Create a package for a polygon contest"""
     CHROMIUM_CREATE_POLYGON_PACKAGE_ARN = os.environ[
         "CHROMIUM_CREATE_POLYGON_PACKAGE_ARN"
     ]
@@ -163,6 +168,7 @@ async def create_package(contestid):
 @click.pass_context
 @click.argument("contestid")
 async def package_status(ctx, contestid):
+    """Check the status of the last polygon package created"""
     CHROMIUM_CHECK_PACKAGE_STATUS_ARN = os.environ["CHROMIUM_CHECK_PACKAGE_STATUS_ARN"]
     lambda_client = boto3.client("lambda")
     payload = {
@@ -214,6 +220,7 @@ async def package_status(ctx, contestid):
 @click.pass_context
 @click.argument("contestid")
 async def download_package(ctx, contestid):
+    """Download the last polygon package created"""
     CHROMIUM_DOWNLOAD_PACKAGE_ARN = os.environ["CHROMIUM_DOWNLOAD_PACKAGE_ARN"]
     BUCKET = os.environ["BUCKET"]
     S3WEB = os.environ["S3WEB"]

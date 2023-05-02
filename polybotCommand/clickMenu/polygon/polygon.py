@@ -7,6 +7,7 @@ from . import contest
 @click.group()
 @click.pass_context
 async def polygon(ctx):
+    """Polygon commands."""
     pass
 
 

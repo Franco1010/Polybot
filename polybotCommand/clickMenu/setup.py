@@ -4,6 +4,7 @@ import boto3
 import os
 import utils
 import awsUtils.dynamoSpacesDB as spacesDB
+import awsUtils.dynamoRequestsDB as requestsDB
 
 
 @click.group()
@@ -35,6 +36,14 @@ async def create(ctx):
 
 
 @setup.command()
+@click.argument("groupid")
 @click.pass_context
-async def add():
+async def join(ctx, groupid):
     """Add this server to a group."""
+    requestId = requestsDB.create_item(
+        groupid,
+        ctx.obj["callerCtx"]["space"]["id"],
+        ctx.obj["callerCtx"]["space"]["app"],
+        ctx.obj["callerCtx"]["space"]["name"],
+    )
+    click.echo("Your request id is: " + requestId)

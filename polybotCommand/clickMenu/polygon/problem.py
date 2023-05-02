@@ -12,6 +12,7 @@ import boto3
 @click.group()
 @click.pass_context
 async def problem(ctx):
+    """Polygon problems commands."""
     pass
 
 
@@ -27,6 +28,7 @@ async def help(ctx):
 @click.pass_context
 @click.argument("problemname")
 async def create(contestid, problemname):
+    """Create a new polygon problem."""
     res = create_problem(contestid, problemname)
     click.echo(res["response"])
     data = [["problemName", res["problemName"]], ["problemIdx", res["problemIdx"]]]
@@ -41,6 +43,7 @@ async def create(contestid, problemname):
 @click.argument("problemid")
 @click.pass_context
 async def info(ctx, contestid, problemid):
+    """Get info about a polygon problem."""
     mine = is_mine(ctx.obj["groupId"], contestid)
     if mine != 2:
         click.echo("Polybot doesn't have access to this problem")
@@ -70,6 +73,7 @@ async def info(ctx, contestid, problemid):
 @click.argument("problemid")
 @click.pass_context
 async def download_package(ctx, contestid, problemid):
+    """Download the latest package for a polygon problem."""
     BUCKET = os.environ["BUCKET"]
     S3WEB = os.environ["S3WEB"]
     mine = is_mine(ctx.obj["groupId"], contestid)
@@ -109,6 +113,7 @@ async def download_package(ctx, contestid, problemid):
 @click.argument("tag")
 @click.pass_context
 async def add_solution(ctx, contestid, problemid, solution, tag):
+    """Add a solution to a polygon problem."""
     mine = is_mine(ctx.obj["groupId"], contestid)
     if mine != 2:
         click.echo("Polybot doesn't have access to this problem")
@@ -139,6 +144,7 @@ async def add_solution(ctx, contestid, problemid, solution, tag):
 @click.argument("output")
 @click.pass_context
 async def add_statement(ctx, contestid, problemid, lang, name, legend, input, output):
+    """Add a statement to a polygon problem."""
     mine = is_mine(ctx.obj["groupId"], contestid)
     if mine != 2:
         click.echo("Polybot doesn't have access to this problem")
@@ -165,6 +171,7 @@ async def add_statement(ctx, contestid, problemid, lang, name, legend, input, ou
 @click.argument("test")
 @click.pass_context
 async def add_test(ctx, contestid, problemid, test):
+    """Add a test to a polygon problem."""
     mine = is_mine(ctx.obj["groupId"], contestid)
     if mine != 2:
         click.echo("Polybot doesn't have access to this problem")
@@ -195,6 +202,7 @@ async def add_test(ctx, contestid, problemid, test):
 @click.argument("problemid")
 @click.pass_context
 async def solutions(ctx, contestid, problemid):
+    """List solutions for a polygon problem."""
     mine = is_mine(ctx.obj["groupId"], contestid)
     if mine != 2:
         click.echo("Polybot doesn't have access to this problem")
@@ -229,6 +237,7 @@ async def solutions(ctx, contestid, problemid):
 @click.argument("problemid")
 @click.pass_context
 async def statements(ctx, contestid, problemid):
+    """List statements for a polygon problem."""
     mine = is_mine(ctx.obj["groupId"], contestid)
     if mine != 2:
         click.echo("Polybot doesn't have access to this problem")
@@ -264,6 +273,7 @@ async def statements(ctx, contestid, problemid):
 @click.argument("checker")
 @click.pass_context
 async def set_checker(ctx, contestid, problemid, checker):
+    """Set checker for a polygon problem."""
     mine = is_mine(ctx.obj["groupId"], contestid)
     if mine != 2:
         click.echo("Polybot doesn't have access to this problem")
