@@ -27,14 +27,16 @@ def updateWorkingCopies(contestId):
     driver.get(POLYGON_WEBSITE + "login")
     wait = WebDriverWait(driver, 120)
     loginForm = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "enterForm")))
-    username_input = driver.find_element(By.NAME, "login")
-    password_input = driver.find_element(By.NAME, "password")
+    username_input = wait.until(EC.presence_of_element_located((By.NAME, "login")))
+    password_input = wait.until(EC.presence_of_element_located((By.NAME, "password")))
     username_input.send_keys(accountPolygonSecret["login"])
     password_input.send_keys(accountPolygonSecret["password"])
-    checkbox = driver.find_element(By.NAME, "attachSessionToIp")
+    checkbox = wait.until(
+        EC.presence_of_element_located((By.NAME, "attachSessionToIp"))
+    )
     if checkbox.is_selected():
         checkbox.click()
-    submit_button = driver.find_element(By.NAME, "submit")
+    submit_button = wait.until(EC.presence_of_element_located((By.NAME, "submit")))
     submit_button.click()
 
     ccid_input = wait.until(
