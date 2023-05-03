@@ -8,6 +8,7 @@ import sys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 
 sys.path.append("../")
 from webDriver import WebDriver
@@ -67,10 +68,30 @@ def createPolygonProblem(contestId, problemName):
     )
     create_button.click()
 
-    wait.until(EC.presence_of_element_located((By.ID, "top-messagebox")))
-    response = wait.until(EC.visibility_of_element_located((By.ID, "top-messagebox")))
-    response = response.text
+    def find_field_error(wait):
+        try:
+            fieldError = wait.until(
+                EC.presence_of_element_located((By.CLASS_NAME, "field-error"))
+            )
+            return fieldError.text
+        except TimeoutException:
+            return None
 
+    def find_top_messagebox(wait):
+        try:
+            response_element = wait.until(
+                EC.visibility_of_element_located((By.ID, "top-messagebox"))
+            )
+            return response_element.text
+        except TimeoutException:
+            return "Unknown error"
+
+    response = find_field_error(WebDriverWait(driver, 5))
+    if response:
+        driver.close()
+        return {"error": response}
+
+    response = find_top_messagebox(wait)
     driver.close()
     return {
         "response": response,
