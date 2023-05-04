@@ -16,6 +16,7 @@ Globals:
         PACKAGES_PATH: packages
         S3WEB: !Sub "http://${Bucket}.s3-website.${AWS::Region}.amazonaws.com"
         POLYGON_WEBSITE: 'https://polygon.codeforces.com/'
+        SAGEMAKER_ENDPOINT: 'jumpstart-example-infer-huggingface-tra-2023-05-03-14-10-49-058'
 
 Resources:
   # --------------------- STORAGE ---------------------
@@ -205,6 +206,10 @@ Resources:
               Action:
                   - dynamodb:*
               Resource: '*'
+            - Effect: Allow
+              Action:
+                  - sagemaker:InvokeEndpoint
+              Resource: "*"
 
   ChromiumScreenshot:
     Type: AWS::Serverless::Function
