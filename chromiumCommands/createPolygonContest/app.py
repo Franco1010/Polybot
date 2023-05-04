@@ -30,14 +30,16 @@ def createPolygonContest(contestName, contestLocation, contestDate):
     driver.get(POLYGON_WEBSITE + "login")
     wait = WebDriverWait(driver, 120)
     loginForm = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "enterForm")))
-    username_input = driver.find_element(By.NAME, "login")
-    password_input = driver.find_element(By.NAME, "password")
+    username_input = wait.until(EC.presence_of_element_located((By.NAME, "login")))
+    password_input = wait.until(EC.presence_of_element_located((By.NAME, "password")))
     username_input.send_keys(accountPolygonSecret["login"])
     password_input.send_keys(accountPolygonSecret["password"])
-    checkbox = driver.find_element(By.NAME, "attachSessionToIp")
+    checkbox = wait.until(
+        EC.presence_of_element_located((By.NAME, "attachSessionToIp"))
+    )
     if checkbox.is_selected():
         checkbox.click()
-    submit_button = driver.find_element(By.NAME, "submit")
+    submit_button = wait.until(EC.presence_of_element_located((By.NAME, "submit")))
     submit_button.click()
 
     ccid_input = wait.until(
@@ -76,17 +78,29 @@ def createPolygonContest(contestName, contestLocation, contestDate):
     response = wait.until(EC.visibility_of_element_located((By.ID, "top-messagebox")))
     response = response.text
 
-    first_row = driver.find_element_by_css_selector(
-        "table.grid.tablesorter.contest-list-grid tbody tr"
+    rows = wait.until(
+        EC.presence_of_all_elements_located(
+            (By.CSS_SELECTOR, "table.grid.tablesorter.contest-list-grid tbody tr")
+        )
     )
-    contestId = first_row.find_elements_by_css_selector("td")[1].text
-    contestName_element = first_row.find_elements_by_css_selector("td")[2]
-    contestName = (
-        re.search(r"^(.+?)\s+problems", contestName_element.text).group(1).strip()
-    )
+    print("NOW: ", rows)
+    max_contest_id = -1
+    max_contest_name = ""
+    for row in rows:
+        contest_id = int(row.get_attribute("contestid"))
+        if contest_id > max_contest_id:
+            max_contest_id = contest_id
+            max_contest_name = row.get_attribute("contestname")
+
+    if max_contest_name != contestName:
+        return {"response": response}
 
     driver.close()
-    return {"response": response, "contestId": contestId, "contestName": contestName}
+    return {
+        "response": response,
+        "contestId": str(max_contest_id),
+        "contestName": contestName,
+    }
 
 
 def lambda_handler(event, context):
