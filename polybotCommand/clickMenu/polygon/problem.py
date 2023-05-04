@@ -27,7 +27,7 @@ async def help(ctx):
 @click.argument("contestid")
 @click.pass_context
 @click.argument("problemname")
-async def create(contestid, problemname):
+async def create(ctx, contestid, problemname):
     """Create a new polygon problem."""
     res = create_problem(contestid, problemname)
     click.echo(res["response"])

@@ -27,16 +27,17 @@ def checkPackageStatus(contestId):
     driver.get(POLYGON_WEBSITE + "login")
     wait = WebDriverWait(driver, 120)
     loginForm = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "enterForm")))
-    username_input = driver.find_element(By.NAME, "login")
-    password_input = driver.find_element(By.NAME, "password")
+    username_input = wait.until(EC.presence_of_element_located((By.NAME, "login")))
+    password_input = wait.until(EC.presence_of_element_located((By.NAME, "password")))
     username_input.send_keys(accountPolygonSecret["login"])
     password_input.send_keys(accountPolygonSecret["password"])
-    checkbox = driver.find_element(By.NAME, "attachSessionToIp")
+    checkbox = wait.until(
+        EC.presence_of_element_located((By.NAME, "attachSessionToIp"))
+    )
     if checkbox.is_selected():
         checkbox.click()
-    submit_button = driver.find_element(By.NAME, "submit")
+    submit_button = wait.until(EC.presence_of_element_located((By.NAME, "submit")))
     submit_button.click()
-
     ccid_input = wait.until(
         EC.presence_of_element_located((By.XPATH, "//input[@name='ccid'][@value]"))
     )
@@ -50,17 +51,31 @@ def checkPackageStatus(contestId):
         + "contestId={}".format(contestId)
         + "&ccid={}".format(ccid_value)
     )
-
-    idx_cells = driver.find_elements(
-        By.XPATH, '//table[@class="grid tablesorter problem-list-grid"]//tbody/tr/td[5]'
+    idx_cells = wait.until(
+        EC.presence_of_all_elements_located(
+            (
+                By.XPATH,
+                '//table[@class="grid tablesorter problem-list-grid"]//tbody/tr/td[5]',
+            )
+        )
     )
-    revision_cells = driver.find_elements(
-        By.XPATH, '//table[@class="grid tablesorter problem-list-grid"]//tbody/tr/td[7]'
+    revision_cells = wait.until(
+        EC.presence_of_all_elements_located(
+            (
+                By.XPATH,
+                '//table[@class="grid tablesorter problem-list-grid"]//tbody/tr/td[7]',
+            )
+        )
     )
 
     response = {}
     for idx_cell, revision_cell in zip(idx_cells, revision_cells):
-        x, y = revision_cell.text.split("/")
+        cells = revision_cell.text.split("/")
+        if len(cells) == 2:
+            x, y = cells
+        else:
+            x = -1
+            y = -1
         response[idx_cell.text] = {"curRevision": x, "packageRevision": y}
 
     driver.close()
